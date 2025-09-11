@@ -7,4 +7,4 @@
 - README.md 파일 최초 추가
 
 ### 📅 250911
-- github & webhook 연동
+- github & discord webhook 연동
