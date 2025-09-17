@@ -44,4 +44,17 @@ export const NavData = [
             { label: "치과", path: "/nearby/dental" },
         ],
     },
+    {
+        label: "커뮤니티",
+        path: "/community",
+        children: [
+            { label: "자유게시판", path: "/community/free" },
+            { label: "질문답변", path: "/community/qna" },
+            { label: "건강후기", path: "/community/reviews" },
+            { label: "챌린지", path: "/community/challenges" },
+            { label: "모임", path: "/community/meetups" },
+            { label: "전문가 상담", path: "/community/expert" },
+        ],
+    },
+
 ];

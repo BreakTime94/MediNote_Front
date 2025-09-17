@@ -5,13 +5,16 @@ import SiteFooter from "../components/common/footer/SiteFooter.jsx";
 
 export default function RootLayout() {
     return (
-        <div>
+        <div className="min-h-screen flex flex-col">
+            {/* 전체 화면 높이를 차지하는 flex 컨테이너 */}
+
             <header>
                 <SiteHeader/>
                 <MainNav/>
             </header>
 
-            <main>
+            <main className="flex-1">
+                {/* flex-1: 남은 공간을 전부 차지 */}
                 <Outlet/>
             </main>
 
