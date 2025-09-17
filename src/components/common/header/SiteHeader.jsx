@@ -3,7 +3,7 @@ import TextButton from "../button/TextButton.jsx";
 import IconButton from "../button/IconButton.jsx";
 import { IoIosSearch } from "react-icons/io";
 
-function AppHeader() {
+function SiteHeader() {
     return (
         <header className="w-full bg-white px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -49,4 +49,4 @@ function AppHeader() {
     );
 }
 
-export default AppHeader;
+export default SiteHeader;
