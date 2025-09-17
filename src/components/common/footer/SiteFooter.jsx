@@ -1,6 +1,6 @@
 import React from "react";
 
-function AppFooter(){
+function SiteFooter(){
     return (
         <footer>
             <p>이것은 footer</p>
@@ -8,4 +8,4 @@ function AppFooter(){
     );
 }
 
-export default AppFooter;
+export default SiteFooter;
