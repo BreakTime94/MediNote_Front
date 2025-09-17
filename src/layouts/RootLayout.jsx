@@ -1,22 +1,25 @@
-import AppHeader from "../components/common/layout/AppHeader.jsx";
-import AppNav from "../components/common/layout/AppNav.jsx";
+import SiteHeader from "../components/common/header/SiteHeader.jsx";
+import MainNav from "../components/common/nav/MainNav.jsx";
 import {Outlet} from "react-router-dom";
-import AppFooter from "../components/common/layout/AppFooter.jsx";
+import SiteFooter from "../components/common/footer/SiteFooter.jsx";
 
 export default function RootLayout() {
     return (
-        <div>
+        <div className="min-h-screen flex flex-col">
+            {/* 전체 화면 높이를 차지하는 flex 컨테이너 */}
+
             <header>
-                <AppHeader/>
-                <AppNav/>
+                <SiteHeader/>
+                <MainNav/>
             </header>
 
-            <main>
+            <main className="flex-1">
+                {/* flex-1: 남은 공간을 전부 차지 */}
                 <Outlet/>
             </main>
 
             <footer>
-                <AppFooter/>
+                <SiteFooter/>
             </footer>
         </div>
     );
