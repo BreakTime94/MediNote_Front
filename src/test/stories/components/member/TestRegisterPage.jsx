@@ -16,7 +16,9 @@ function TestRegisterPage(props) {
       nickname : `${e.target.nickname.value}`
     };
 
-    axios.post(`http://localhost:8081/member/register`, input)
+    console.log(input);
+
+    axios.post(`http://localhost:8083/api/member/register`, input)
         .then((res) => {
           console.log("Content-Type", res.headers[`content-type`])
         })
