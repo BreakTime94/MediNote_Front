@@ -1,9 +1,9 @@
-import React from "react";
+import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
 function testUIPage(props) {
-
+  const [loginDto, setLoginDto] = useState({})
   const navigate = useNavigate();
 
   console.log("useNavigate 두둥 등장")
@@ -12,6 +12,26 @@ function testUIPage(props) {
     e.preventDefault();
     navigate("/member/signup");
   };
+
+  const handleChange = (e) => {
+    e.preventDefault();
+    let input = loginDto;
+    const {name, value} = e.target // {email : value, password: value}
+    input[name] = value;
+    setLoginDto(input)
+  }
+
+  const Login = e => {
+    e.preventDefault()
+    axios.post("http://localhost:8083/api/member/auth/login", loginDto)
+        .then((resp) => {
+          console.log("Content-Type", resp.headers['content-type'])
+        })
+        .catch((error) => {
+          console.log("error", error)
+    });
+    navigate("/member/mypage")
+  }
 
   return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -25,7 +45,7 @@ function testUIPage(props) {
                 id="id"
                 name="id"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="아이디를 입력하세요"
+                placeholder="아이디를 입력하세요" onChange={handleChange}
             />
           </div>
 
@@ -49,7 +69,7 @@ function testUIPage(props) {
                 type="button"
                 className="flex-1 bg-pink-300 text-white py-2 rounded-lg
                      hover:bg-pink-400 active:bg-pink-500 cursor-pointer"
-                     
+                onClick={Login}
             >
               로그인
             </button>
