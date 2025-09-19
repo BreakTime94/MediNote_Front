@@ -5,9 +5,12 @@ function TestMyPage() {
   const {memberDto, setMemberDto} = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8083/api/member/auth/login")
+    axios.get("http://localhost:8083/api/member/get", {
+      withCredentials: true
+    })
         .then((res) => {
           console.log("Content-Type", res.headers["content-type"])
+          console.log("로그인 된 멤버 정보", res.data)
           setMemberDto(res.data)
           console.log(memberDto)
         })

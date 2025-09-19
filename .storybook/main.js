@@ -15,6 +15,9 @@ const config = {
   "framework": {
     "name": "@storybook/react-vite",
     "options": {}
+  },
+  "proxy" : {
+    '/api': 'http://localhost:8083'
   }
 };
 export default config;
