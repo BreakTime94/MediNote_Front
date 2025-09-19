@@ -3,7 +3,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
 function testUIPage(props) {
-  const [loginDto, setLoginDto] = useState({})
+  const [loginDto, setLoginDto] = useState({email: "", password: ""})
   const navigate = useNavigate();
 
   console.log("useNavigate 두둥 등장")
@@ -19,9 +19,11 @@ function testUIPage(props) {
     const {name, value} = e.target // {email : value, password: value}
     input[name] = value;
     setLoginDto(input)
+
   }
 
   const Login = e => {
+    console.log( "login 정보",loginDto)
     e.preventDefault()
     axios.post("http://localhost:8083/api/member/auth/login", loginDto)
         .then((resp) => {
@@ -42,8 +44,8 @@ function testUIPage(props) {
               아이디
             </label>
             <input
-                id="id"
-                name="id"
+                id="email"
+                name="email"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="아이디를 입력하세요" onChange={handleChange}
             />
@@ -59,7 +61,7 @@ function testUIPage(props) {
                 name="password"
                 type="password"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="비밀번호를 입력하세요"
+                placeholder="비밀번호를 입력하세요" onChange={handleChange}
             />
           </div>
 
