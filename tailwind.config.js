@@ -11,7 +11,8 @@ export default {
                 primary: {
                     500: "#7c4dff",   // 포인트
                 },
-                pinky: "#ff9bd4",
+
+
                 purpley: "#c89cff",
             },
             backgroundImage: {
