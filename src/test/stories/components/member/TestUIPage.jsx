@@ -25,7 +25,7 @@ function testUIPage(props) {
   const Login = e => {
     console.log( "login 정보",loginDto)
     e.preventDefault()
-    axios.post("http://localhost:8083/api/member/auth/login", loginDto)
+    axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
           console.log("Content-Type", resp.headers['content-type'])
         })
