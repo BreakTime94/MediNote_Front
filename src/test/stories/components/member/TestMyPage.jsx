@@ -2,10 +2,10 @@ import React, {useEffect, useState} from "react";
 import axios from "axios";
 
 function TestMyPage() {
-  const {memberDto, setMemberDto} = useState([]);
+  const [memberDto, setMemberDto] = useState({});
 
   useEffect(() => {
-    axios.get("http://localhost:8083/api/member/get", {
+    axios.get("/api/member/get", {
       withCredentials: true
     })
         .then((res) => {
