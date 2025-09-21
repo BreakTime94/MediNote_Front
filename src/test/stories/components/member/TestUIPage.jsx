@@ -28,11 +28,11 @@ function testUIPage(props) {
     axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
           console.log("Content-Type", resp.headers['content-type'])
+          navigate("/member/mypage")
         })
         .catch((error) => {
           console.log("error", error)
     });
-    navigate("/member/mypage")
   }
 
   return (
