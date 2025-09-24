@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import axiosInterceptor from "./axiosInterceptor.js";
-import axios from "axios";
+import api from "./axiosInterceptor.js";
 
 
 function TestMeasurement(props) {
@@ -33,7 +33,7 @@ function TestMeasurement(props) {
         e.preventDefault();
         console.log(form);
 
-        axios.post("http://localhost:8081/measurement", form, {
+        api.post("/health/measurement/create", form, {
           withCredentials: true
         }).then((resp) => {
           console.log("Content-Type", resp.headers[`content-type`])
@@ -47,13 +47,13 @@ function TestMeasurement(props) {
         <span className="text-gray-700 font-semibold mb-1">{label}</span>
         <div className="flex space-x-4">
             <label className="flex items-center space-x-1">
-                <input type="radio" name={name} value="Y" checked={form[name] === "Y"}
-                       onChange={handleChange} className="text-primary-500 focus:ring-primary-500"/>
+                <input type="radio" name={name} value="true" checked={form[name] === true}
+                       onChange={(e) => setForm({ ...form, [name]: e.target.value === "true" })} className="text-primary-500 focus:ring-primary-500"/>
                 <span>Y</span>
             </label>
             <label className="flex items-center space-x-1">
-                <input type="radio" name={name} value="N" checked={form[name] === "N"}
-                       onChange={handleChange} className="text-primary-500 focus:ring-primary-500"/>
+                <input type="radio" name={name} value="false" checked={form[name] === false}
+                       onChange={(e) => setForm({ ...form, [name]: e.target.value === "false" })} className="text-primary-500 focus:ring-primary-500"/>
                 <span>N</span>
             </label>
         </div>
@@ -76,7 +76,7 @@ function TestMeasurement(props) {
         <RadioYN name="smoking" label="흡연 여부"/>
 
         <RadioYN name="drinking" label="음주 여부"/>
-        {form.drinking === "Y" && (<div className="ml-4 space-y-3">
+        {form.drinking === true && (<div className="ml-4 space-y-3">
             <div className="flex flex-col">
                 <label className="text-gray-800 mb-1">주당 음주 횟수</label>
                 <input type="number" name="drinkingPerWeek" value={form.drinkingPerWeek} onChange={handleChange}
@@ -91,7 +91,7 @@ function TestMeasurement(props) {
         </div>)}
 
         <RadioYN name="chronicDiseaseYn" label="기저질환 여부"/>
-        {form.chronicDiseaseYn === "Y" && (<div className="flex flex-col ml-4">
+        {form.chronicDiseaseYn === true && (<div className="flex flex-col ml-4">
             <label className="text-gray-800 mb-1">기저질환명</label>
             <select name="chronicDiseaseDetail" value={form.chronicDiseaseDetail} onChange={handleChange}
                     className="border border-gray-300 rounded-md p-2 focus:ring-purple-400">
@@ -104,7 +104,7 @@ function TestMeasurement(props) {
         </div>)}
 
         <RadioYN name="allergyYn" label="알러지 여부"/>
-        {form.allergyYn === "Y" && (<div className="flex flex-col ml-4">
+        {form.allergyYn === true && (<div className="flex flex-col ml-4">
             <label className="text-gray-800 mb-1">알러지명</label>
             <select name="allergyDetail" value={form.allergyDetail} onChange={handleChange}
                     className="border border-gray-300 rounded-md p-2 focus:ring-purple-400">
@@ -117,7 +117,7 @@ function TestMeasurement(props) {
         </div>)}
 
         <RadioYN name="medicationYn" label="복용약 여부"/>
-        {form.medicationYn === "Y" && (<div className="flex flex-col ml-4">
+        {form.medicationYn === true && (<div className="flex flex-col ml-4">
             <label className="text-gray-800 mb-1">복용약명</label>
             <select name="allergyDetail" value={form.medicationDetail} onChange={handleChange}
                     className="border border-gray-300 rounded-md p-2 focus:ring-purple-400">
