@@ -22,7 +22,6 @@ function TestMyPage() {
           console.log("Content-Type", res.headers["content-type"])
           console.log("로그인 된 멤버 정보", res.data)
           setMemberDto(res.data)
-          console.log(memberDto)
         })
         .catch((error) => {
           console.log("error : ", error)

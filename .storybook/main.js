@@ -19,7 +19,7 @@ const config = {
   "viteFinal": async (config) => {
     config.server = config.server || {};
     config.server.proxy = {
-      "/api/member": {
+      "/api": {
         "target": "http://localhost:8083",
         "changeOrigin": true,
         "configure": (proxy, options) => {
