@@ -42,6 +42,11 @@ function TestMyPage() {
     })
   }
 
+  const writeMeasurement = (e) => {
+    e.preventDefault();
+    navigate("/health/measurement");
+  }
+
 
   return(
       <>
@@ -68,8 +73,16 @@ function TestMyPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">계정등록일</label>
               <input className={"border w-full"} value={memberDto.regDate} readOnly={true}/>
             </div>
-            <div>
+            <div  className={"m-2"}>
               <LogoutButton children = {"로그아웃"} onClick={logout} />
+            </div>
+            <div  className={"m-2"}>
+              <button type="button"
+                      className="flex-1 bg-purple-300 text-gray-700 py-2 rounded-lg shadow
+                     hover:bg-purple-400 active:bg-purple-500 cursor-pointer"
+              onClick={writeMeasurement}>
+                개인 건강기록 입력
+              </button>
             </div>
           </div>
         </div>

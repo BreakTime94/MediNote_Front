@@ -1,7 +1,8 @@
 import TestUIPage from "./TestUIPage.jsx";
-import TestUIPageStories from "./TestUIPage.stories.jsx";
 import TestRegisterPage from "./TestRegisterPage.jsx";
 import TestMyPage from "./TestMyPage.jsx";
+import TestMeasurement from "./TestMeasurement.jsx";
+
 
 export default {
   title: "Test/member/main",
@@ -10,7 +11,8 @@ export default {
     reactRouterPath: "/member",
     reactExtraPath : [
         {path: "/member/signup", element: <TestRegisterPage/>},
-      {path: "/member/mypage", element: <TestMyPage/>}
+      {path: "/member/mypage", element: <TestMyPage/>},
+      {path: "/health/measurement", element: <TestMeasurement/> }
     ]
   }
 };
