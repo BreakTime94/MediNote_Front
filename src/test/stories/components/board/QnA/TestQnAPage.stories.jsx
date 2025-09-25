@@ -1,15 +1,17 @@
+import QnAList from "./QnAList.jsx";
+import QnARegister from "./QnARegister.jsx";
 
 export default{
-    title: "Test//board/notifiy",
-    component: null,
+    title: "Test/board/qna",
+    component: QnAList,
     parameters: {
-        reactRouterPath: "/notifiy",
+        reactRouterPath: "/qna",
         reactExtraPath : [
-            {path: "/notifiy/register", element: null},
-            {path: "/notifiy/modify", element: null},
-            {path: "/notifiy/read", element: null}
+            {path: "/qna/register", element: <QnARegister />},
+            {path: "/qna/modify", element: null},
+            {path: "/qna/read", element: null}
         ]
     }
 };
 
-export const Board = () => null
+export const QnA = () => <QnAList />;
