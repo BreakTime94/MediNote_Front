@@ -46,9 +46,14 @@ function TestMyPage() {
     navigate("/health/measurement");
   }
 
-  const boardlist = (e) => {
+  const boardList = (e) => {
     e.preventDefault();
     navigate("/qna")
+  }
+
+  const boardRegister = (e) => {
+    e.preventDefault();
+    navigate("/qna/register")
   }
 
 
@@ -90,7 +95,13 @@ function TestMyPage() {
               <button type="button"
                       className="flex-1 bg-purple-300 text-gray-700 py-2 rounded-lg shadow
                      hover:bg-purple-400 active:bg-purple-500 cursor-pointer"
-                      onClick={boardlist}>
+                      onClick={boardList}>
+                BoardList
+              </button>
+              <button type="button"
+                      className="flex-1 bg-purple-300 text-gray-700 py-2 rounded-lg shadow
+                     hover:bg-purple-400 active:bg-purple-500 cursor-pointer"
+                      onClick={boardRegister}>
                 BoardList
               </button>
             </div>
