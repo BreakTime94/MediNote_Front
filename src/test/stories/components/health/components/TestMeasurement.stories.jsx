@@ -1,13 +1,13 @@
 
-import TestMeasurement from "./components/TestMeasurement.jsx";
+import TestMeasurement from "./TestMeasurement.jsx";
 
 export default {
-  title: "Test/Measurement/main",
+  title: "Test/health/measurement",
   component: TestMeasurement,
   parameters: {
     reactRouterPath: "/health",
     reactExtraPath : [
-        // {path: "/health/Measurement", element: <TestRegisterPage/>},
+        {path: "/health/Measurement", element: <TestMeasurement/>},
     ]
   }
 };
