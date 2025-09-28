@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import googleLogo from "./assets/web_light_rd_na.svg"
 
 function testUIPage(props) {
   const [loginDto, setLoginDto] = useState({email: "", password: ""})
@@ -22,7 +23,7 @@ function testUIPage(props) {
 
   }
 
-  const Login = e => {
+  const login = e => {
     console.log( "login 정보",loginDto)
     e.preventDefault()
     axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
@@ -33,6 +34,10 @@ function testUIPage(props) {
         .catch((error) => {
           console.log("error", error)
     });
+  }
+
+  const googleLogin = (e) => {
+    window.location.href = "http://localhost:8083/api/oauth2/authorization/google";
   }
 
   return (
@@ -71,7 +76,7 @@ function testUIPage(props) {
                 type="button"
                 className="flex-1 bg-pink-300 text-white py-2 rounded-lg
                      hover:bg-pink-400 active:bg-pink-500 cursor-pointer"
-                onClick={Login}
+                onClick={login}
             >
               로그인
             </button>
@@ -82,6 +87,19 @@ function testUIPage(props) {
             onClick={register}
             >
               회원가입
+            </button>
+          </div>
+          {/*소셜 계정 구글 로그인 */}
+          <div className="mt-2">
+            <button
+                type="button"
+                className="w-full h-10 flex items-center justify-center gap-2 rounded-lg border cursor-pointer hover:bg-gray-50"
+                onClick={googleLogin}
+            >
+              <img src={googleLogo} alt="Google" className="w-10 h-10" />
+              <span className="text-sm font-medium text-gray-700 leading-none">
+                Sign in with Google
+              </span>
             </button>
           </div>
         </div>
