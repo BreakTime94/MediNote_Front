@@ -1,5 +1,6 @@
 import React from "react";
 import {createMemoryRouter, MemoryRouter, RouterProvider} from "react-router-dom";
+import {Toaster} from "react-hot-toast";
 import "../src/index.css";
 
 /** @type { import('@storybook/react-vite').Preview } */
@@ -33,7 +34,21 @@ const preview = {
          ],
          {initialEntries: [storyPath]},
      );
-     return <RouterProvider router={router}/>;
+     return (
+         <>
+            <RouterProvider router={router}/>
+             <Toaster
+                 position="top-center"
+                 gutter={8}
+                 toastOptions={{
+                     duration: 3000,
+                     className: "rounded-2xl px-0 py-0 shadow-lg",
+                     style: { background: "transparent", boxShadow: "none" }, // Tailwind로만 스타일
+                     ariaProps: { role: "status", "aria-live": "polite" },
+                 }}
+             />
+         </>
+     );
     }
   ]
 };
