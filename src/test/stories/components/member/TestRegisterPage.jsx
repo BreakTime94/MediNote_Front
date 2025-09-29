@@ -10,8 +10,28 @@ function TestRegisterPage(props) {
     nickname: ""
   })
 
+  const [errors, setErrors] = useState({});
 
-  const naviagate = useNavigate();
+  const[password, setPassword] = useState({
+    "value": "",
+    "passwordCheck": "",
+    "valueChecked" : false,
+  })
+
+  const[passwordRule, setPasswordRule] = useState({
+    "length" : false,
+    "" : false,
+    "letter" : false,
+    "special" : false,
+  })
+
+  const navigate = useNavigate();
+
+  const validation = (name, value) => {
+    if(!value && ["email", "password", "nickname", "extraEmail"].includes(name)){
+
+    }
+  }
 
   const submit = (e) => {
     e.preventDefault()
@@ -19,7 +39,7 @@ function TestRegisterPage(props) {
     axios.post(`/api/member/register`, member)
         .then((res) => {
           console.log("Content-Type", res.headers[`content-type`])
-          naviagate("/member")
+          navigate("/member")
         })
         .catch((error) => {
           console.log("error", error);
@@ -32,6 +52,13 @@ function TestRegisterPage(props) {
     setMember((prev) => ({
       ...prev, [name] : value
     }))
+  }
+
+  const passwordChange = (e) => {
+    e.preventDefault();
+    const value = e.target.value;
+
+    setPassword({...password, [name] : value});
   }
 
   return (
@@ -52,7 +79,7 @@ function TestRegisterPage(props) {
           </div>
 
           {/* 비밀번호 입력 */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               비밀번호
             </label>
@@ -62,9 +89,34 @@ function TestRegisterPage(props) {
                 type="password"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="비밀번호를 입력하세요"
-                onChange={change}
+                onChange={passwordChange}
             />
+            <ul className={"mt-2 text-sm"}>
+              <li className={password.length ? "text-blue-500" : "text-red-500"}>
+                비밀번호는 8자 ~ 16자 사이여야 합니다.
+              </li>
+              <li className={password.letter ? "text-blue-500" : "text-red-500"}>
+                비밀번호는 영문자를 1개이상 포함하여야 합니다.
+              </li>
+              <li className={password.special ? "text-blue-500" : "text-red-500"}>
+                비밀번호는 특수문자를 1개이상 포함하여야 합니다.
+              </li>
+            </ul>
           </div>
+          {/* 비밀번호 확인 */}
+          <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            비밀번호
+          </label>
+          <input
+              id="passwordCheck"
+              name="passwordCheck"
+              type="password"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="위에 입력하신 비밀번호를 입력하여주세요."
+              onChange={change}
+          />
+        </div>
           {/* 추가 이메일 입력 */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
