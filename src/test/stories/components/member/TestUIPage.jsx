@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-import googleLogo from "./assets/web_light_rd_na.svg"
+import GoogleLoginButton from "./GoogleLoginButton.jsx";
 
 function testUIPage(props) {
   const [loginDto, setLoginDto] = useState({email: "", password: ""})
@@ -34,10 +34,6 @@ function testUIPage(props) {
         .catch((error) => {
           console.log("error", error)
     });
-  }
-
-  const googleLogin = (e) => {
-    window.location.href = "http://localhost:8083/api/oauth2/authorization/google";
   }
 
   return (
@@ -91,16 +87,7 @@ function testUIPage(props) {
           </div>
           {/*소셜 계정 구글 로그인 */}
           <div className="mt-2">
-            <button
-                type="button"
-                className="w-full h-10 flex items-center justify-center gap-2 rounded-lg border cursor-pointer hover:bg-gray-50"
-                onClick={googleLogin}
-            >
-              <img src={googleLogo} alt="Google" className="w-10 h-10" />
-              <span className="text-sm font-medium text-gray-700 leading-none">
-                Sign in with Google
-              </span>
-            </button>
+            <GoogleLoginButton></GoogleLoginButton>
           </div>
         </div>
       </div>
