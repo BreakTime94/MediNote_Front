@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import api from "./axiosInterceptor.js";
+import RegisterEmailField from "./EmailVerification.jsx";
 
 function TestRegisterPage(props) {
   // Router의 이동수단
@@ -140,14 +141,17 @@ function TestRegisterPage(props) {
     }, [fieldName, value, apiUrl]); //실제로는 value만 바뀜, 허나 공식 리액트 권장사항.
     return duplicationCheck;
   };
-
+  //중복검사 로직 상태 String 값 available로 나와야 합격
   const emailStatus = useDuplicateCheck("email", member.email, "/member/check-email", validation);
   const extraEmailStatus = useDuplicateCheck("email", member.extraEmail, "/member/check-email", validation);
   const nicknameStatus = useDuplicateCheck("nickname", member.nickname, "/member/check-nickname", validation);
 
+  // 이메일 인증에서 사용할 props
+  const [verification, setVerification] = useState(false); // 인증 완료 여부
+
   // 유효성 검사, 중복체크에 통과하면, 버튼 활성화
   const isDisabled = !passwordMatch || Object.values(passwordRules).some(r => !r) || Object.values(errors).some((e)=> e && e.length > 0) ||
-      emailStatus !== "available" || extraEmailStatus !== "available" || nicknameStatus !== "available";
+      emailStatus !== "available" || extraEmailStatus !== "available" || nicknameStatus !== "available" || !verification;
 
   //작성내용 제출
   const submit = (e) => {
@@ -167,32 +171,8 @@ function TestRegisterPage(props) {
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white shadow-lg rounded-2xl p-8 w-96">
           {/* 이메일 입력 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              이메일
-            </label>
-            <input
-                id="email"
-                name="email"
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="이메일을 입력하세요"
-                onBlur={handleBlur}
-                onChange={change}
-            />
-            {/* 에러 메세지 */}
-            {touched.email && errors.email &&
-              (<ul className={"mt-2 text-xs"}>
-              <li className={"text-red-500"}>{errors.email}</li>
-            </ul>)}
-            {/* 중복체크 메세지*/}
-            {touched.email && !errors.email && emailStatus !== "idle" &&
-                (<ul className={"mt-2 text-xs"}>
-                <li className={emailStatus === "available" ? "text-blue-500" :"text-red-500"}>
-                  {emailStatus === "available" ? "사용 가능한 이메일입니다." : "사용하실 수 없는 이메일입니다."}
-                </li>
-              </ul>)}
-          </div>
-
+          <RegisterEmailField member={member} touched={touched} errors={errors} emailStatus={emailStatus}
+                              handleBlur={handleBlur} change={change} verification={verification} setVerification={setVerification}/>
           {/* 비밀번호 입력 */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
