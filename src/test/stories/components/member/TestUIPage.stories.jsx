@@ -4,6 +4,7 @@ import TestMyPage from "./TestMyPage.jsx";
 import TestMeasurement from "./TestMeasurement.jsx";
 import QnAList from "./QnAList.jsx";
 import QnARegister from "./QnARegister.jsx";
+import SocialRegister from "./assets/SocialRegister.jsx";
 
 
 export default {
@@ -16,7 +17,8 @@ export default {
       {path: "/member/mypage", element: <TestMyPage/>},
       {path: "/health/measurement", element: <TestMeasurement/> },
       {path: "/qna", element: <QnAList/>},
-      {path: "/qna/register", element: <QnARegister/>}
+      {path: "/qna/register", element: <QnARegister/>},
+      {path: "/social/signup", element: <SocialRegister/>}
     ]
   }
 };
