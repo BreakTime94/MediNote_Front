@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import GoogleLoginButton from "./GoogleLoginButton.jsx";
 
 function testUIPage(props) {
   const [loginDto, setLoginDto] = useState({email: "", password: ""})
@@ -22,7 +23,7 @@ function testUIPage(props) {
 
   }
 
-  const Login = e => {
+  const login = e => {
     console.log( "login 정보",loginDto)
     e.preventDefault()
     axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
@@ -71,7 +72,7 @@ function testUIPage(props) {
                 type="button"
                 className="flex-1 bg-pink-300 text-white py-2 rounded-lg
                      hover:bg-pink-400 active:bg-pink-500 cursor-pointer"
-                onClick={Login}
+                onClick={login}
             >
               로그인
             </button>
@@ -83,6 +84,10 @@ function testUIPage(props) {
             >
               회원가입
             </button>
+          </div>
+          {/*소셜 계정 구글 로그인 */}
+          <div className="mt-2">
+            <GoogleLoginButton></GoogleLoginButton>
           </div>
         </div>
       </div>
