@@ -1,9 +1,10 @@
 import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import GoogleLoginButton from "./GoogleLoginButton.jsx";
 
 function testUIPage(props) {
-  const [loginDto, setLoginDto] = useState({})
+  const [loginDto, setLoginDto] = useState({email: "", password: ""})
   const navigate = useNavigate();
 
   console.log("useNavigate 두둥 등장")
@@ -19,18 +20,20 @@ function testUIPage(props) {
     const {name, value} = e.target // {email : value, password: value}
     input[name] = value;
     setLoginDto(input)
+
   }
 
-  const Login = e => {
+  const login = e => {
+    console.log( "login 정보",loginDto)
     e.preventDefault()
-    axios.post("http://localhost:8083/api/member/auth/login", loginDto)
+    axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
           console.log("Content-Type", resp.headers['content-type'])
+          navigate("/member/mypage")
         })
         .catch((error) => {
           console.log("error", error)
     });
-    navigate("/member/mypage")
   }
 
   return (
@@ -42,8 +45,8 @@ function testUIPage(props) {
               아이디
             </label>
             <input
-                id="id"
-                name="id"
+                id="email"
+                name="email"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="아이디를 입력하세요" onChange={handleChange}
             />
@@ -59,7 +62,7 @@ function testUIPage(props) {
                 name="password"
                 type="password"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="비밀번호를 입력하세요"
+                placeholder="비밀번호를 입력하세요" onChange={handleChange}
             />
           </div>
 
@@ -69,7 +72,7 @@ function testUIPage(props) {
                 type="button"
                 className="flex-1 bg-pink-300 text-white py-2 rounded-lg
                      hover:bg-pink-400 active:bg-pink-500 cursor-pointer"
-                onClick={Login}
+                onClick={login}
             >
               로그인
             </button>
@@ -81,6 +84,10 @@ function testUIPage(props) {
             >
               회원가입
             </button>
+          </div>
+          {/*소셜 계정 구글 로그인 */}
+          <div className="mt-2">
+            <GoogleLoginButton></GoogleLoginButton>
           </div>
         </div>
       </div>

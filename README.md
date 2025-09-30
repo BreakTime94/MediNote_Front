@@ -16,3 +16,9 @@
 - 기본 레이아웃 설정
 - tailwindcss, axios, react-router-dom, clsx, react-icon 설치
 - tailwindscss.config.js 기본설정, IconButton, TextButton 생성
+
+### 📅 250929
+- react-hot-toast 설치, lucide-react설치
+
+### 📅 250930
+- tailwind-merge 설치
