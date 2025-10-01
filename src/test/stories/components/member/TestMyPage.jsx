@@ -46,6 +46,16 @@ function TestMyPage() {
     navigate("/health/measurement");
   }
 
+  const boardList = (e) => {
+    e.preventDefault();
+    navigate("/qna")
+  }
+
+  const boardRegister = (e) => {
+    e.preventDefault();
+    navigate("/qna/register")
+  }
+
 
   return(
       <>
@@ -81,6 +91,18 @@ function TestMyPage() {
                      hover:bg-purple-400 active:bg-purple-500 cursor-pointer"
               onClick={writeMeasurement}>
                 개인 건강기록 입력
+              </button>
+              <button type="button"
+                      className="flex-1 bg-purple-300 text-gray-700 py-2 rounded-lg shadow
+                     hover:bg-purple-400 active:bg-purple-500 cursor-pointer"
+                      onClick={boardList}>
+                BoardList
+              </button>
+              <button type="button"
+                      className="flex-1 bg-purple-300 text-gray-700 py-2 rounded-lg shadow
+                     hover:bg-purple-400 active:bg-purple-500 cursor-pointer"
+                      onClick={boardRegister}>
+                BoardList
               </button>
             </div>
           </div>
