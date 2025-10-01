@@ -142,9 +142,9 @@ function TestRegisterPage(props) {
     return duplicationCheck;
   };
   //중복검사 로직 상태 String 값 available로 나와야 합격
-  const emailStatus = useDuplicateCheck("email", member.email, "/member/check-email", validation);
-  const extraEmailStatus = useDuplicateCheck("email", member.extraEmail, "/member/check-email", validation);
-  const nicknameStatus = useDuplicateCheck("nickname", member.nickname, "/member/check-nickname", validation);
+  const emailStatus = useDuplicateCheck("email", member.email, "/member/check/email", validation);
+  const extraEmailStatus = useDuplicateCheck("email", member.extraEmail, "/member/check/email", validation);
+  const nicknameStatus = useDuplicateCheck("nickname", member.nickname, "/member/check/nickname", validation);
 
   // 이메일 인증에서 사용할 props
   const [verification, setVerification] = useState(false); // 인증 완료 여부
@@ -249,11 +249,16 @@ function TestRegisterPage(props) {
                 <li className={"text-red-500"}>{errors.extraEmail}</li>
               </ul>)}
             {/* 중복 체크 메세지*/}
-            {touched.extraEmail && !errors.extraEmail && extraEmailStatus !== "idle" &&
+            {touched.extraEmail && !errors.extraEmail && extraEmailStatus !== "idle" && member.email !== member.extraEmail &&
                 (<ul className={"mt-2 text-xs"}>
                   <li className={extraEmailStatus === "available" ? "text-blue-500" :"text-red-500"}>
                     {extraEmailStatus === "available" ? "사용 가능한 이메일입니다." : "사용하실 수 없는 이메일입니다."}
                   </li>
+                </ul>)}
+            {/* extraEmail과 email 중복 방지 */}
+            {touched.extraEmail && !errors.extraEmail && member.extraEmail === member.email &&
+                (<ul className={"mt-2 text-xs"}>
+                  <li className={"text-red-500"}>로그인용 이메일과 같은 이메일을 사용하실 수 없습니다.</li>
                 </ul>)}
           </div>
           {/* 닉네임 입력 */}
