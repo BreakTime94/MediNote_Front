@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "./axiosInterceptor.js"
 import {show} from "../common/ui/toast/commonToast.jsx";
 
 function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, change, verification, setVerification }) {
@@ -9,12 +9,15 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
 
   // 인증메일 요청 (then/catch)
   const handleSendVerificationCode = () => {
-    axios
-        .post("/member/email/send", { email: member.email })
-        .then(() => {
+    api
+        .post("/member/email/send", null, {
+          params: {email: member.email}
+        })
+        .then((resp) => {
           show.success({
-            title : "인증 메일을 발송했습니다. 메일함을 확인하세요.",
-            desc: "메일함을 확인하여 주시기 바랍니다."}
+            title : resp.data.message,
+            desc: resp.data.desc
+          }
           );
           setShowCodeInput(true);
         })
@@ -28,14 +31,14 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
 
   // 인증코드 확인 (then/catch)
   const handleVerifyCode = () => {
-    axios
+    api
         .post("/member/email/verify", {
           email: member.email,
           code: verificationCode,
         })
         .then((res) => {
-          if (res.data.status === "EMAIL_VERIFIED") {
-            show.success({title: "이메일 인증이 완료되었습니다."});
+          if (res.data.available === true) {
+            show.success({title: res.data.message});
             setVerification(true);
             setShowCodeInput(false);
           } else {
@@ -69,11 +72,10 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
         />
 
         {/* 인증 메일 요청 버튼 */}
-        {touched.email && !errors.email && emailStatus==="available" && (
+        {touched.email && !errors.email && emailStatus==="available" && member.email !== member.extraEmail &&(
             <button
                 type="button"
-                className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
-                disabled={verification}
+                className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 onClick={handleSendVerificationCode}
             >
               인증메일 요청
@@ -102,6 +104,11 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
               </button>
             </div>
         )}
+        {!showCodeInput && verification && (
+            <ul className="mt-2 text-xs">
+              <li className="text-blue-500">이메일 인증이 완료되었습니다.</li>
+            </ul>
+        )}
 
         {/* 에러 메시지 */}
         {touched.email && errors.email && (
@@ -111,13 +118,18 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
         )}
 
         {/* 중복 검사 메시지 */}
-        {touched.email && !errors.email && emailStatus !== "idle" && (
+        {touched.email && !errors.email && emailStatus !== "idle" && member.email !== member.extraEmail && (
             <ul className="mt-2 text-xs">
               <li className={emailStatus === "available" ? "text-blue-500" : "text-red-500"}>
                 {emailStatus === "available" ? "사용 가능한 이메일입니다." : "사용하실 수 없는 이메일입니다."}
               </li>
             </ul>
         )}
+        {/* extraEmail과 email 중복 방지 */}
+        {touched.email && !errors.email && member.extraEmail && member.email === member.extraEmail &&
+            (<ul className={"mt-2 text-xs"}>
+              <li className={"text-red-500"}>추가 이메일과 같은 이메일을 사용하실 수 없습니다.</li>
+            </ul>)}
       </div>
   );
 }
