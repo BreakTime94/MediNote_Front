@@ -19,3 +19,6 @@
 
 ### 📅 250929
 - react-hot-toast 설치, lucide-react설치
+
+### 📅 250930
+- tailwind-merge 설치

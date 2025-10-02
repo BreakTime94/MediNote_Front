@@ -2,6 +2,7 @@ import React from "react";
 import {createMemoryRouter, MemoryRouter, RouterProvider} from "react-router-dom";
 import {Toaster} from "react-hot-toast";
 import "../src/index.css";
+import "../src/components/common/styles/theme.css"
 
 /** @type { import('@storybook/react-vite').Preview } */
 const preview = {

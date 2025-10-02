@@ -1,6 +1,7 @@
-import React, {useState} from "react";
-import axios from "axios";
+import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
+import api from "./axiosInterceptor.js";
+import RegisterEmailField from "./EmailVerification.jsx";
 
 function TestRegisterPage(props) {
   // Router의 이동수단
@@ -27,20 +28,27 @@ function TestRegisterPage(props) {
     nickname: false,
   })
 
+  //최초 입력란에 마우스가 클릭 된 순간 작동하는 함수
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    setErrors((prev) => ({ ...prev, [name]: validation(name, value) }));
+  };
+
   // 비밀번호 제외 유효성 검사를 위한 function
   const validation = (name, value) => {
     switch (name) {
       case "email":
         if (!value) return "이메일은 필수입니다.";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다.";
+          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
       case "extraEmail":
-        if (!value) return "추가 이메일도 반드시 입력하여주십시오.";
+        if (!value) return "추가 이메일은 필수입니다.";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다.";
+          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
@@ -65,9 +73,13 @@ function TestRegisterPage(props) {
       ...prev, [name] : value
     }));
 
-    if(touched[name]) {
-      setErrors((prev)=> ({...prev, [name]: validation(name, value)}))
+    if (!touched[name]) {
+      setTouched((prev) => ({...prev, [name]: true}));
     }
+
+    // if(touched[name]) {
+    //   setErrors((prev)=> ({...prev, [name]: validation(name, value)}))
+    // }
   }
 
   // register시에 발생할 수 있는 error 상태 모음
@@ -87,19 +99,65 @@ function TestRegisterPage(props) {
   const passwordChange = (e) => {
     e.preventDefault();
     const{name, value} = e.target
+    //touched 활성화
+    if (!touched[name]) {
+      setTouched((prev) => ({...prev, [name]: true}));
+    }
     // 프론트 단에서 Password 유효성 검증을 위한 State 관리
     setPassword((prev)=> ({...prev, [name]: value}));
     // Member State 값에도 저장해둠
     setMember((prev) => ({...prev, [name] : value}));
   }
 
-  const isDisabled = !passwordMatch || Object.values(passwordRules).some(r => !r) || Object.values(errors).some((e)=> e && e.length > 0)
+
+  //이메일, 추가이메일, 닉네임 중복검사를 위한 함수
+  const useDuplicateCheck = (fieldName, value, apiUrl, validationFn) => {
+    //function 내 state
+    // 이메일, 추가이메일, 닉네임 중복검사를 위한 상태관리 idle, checking, available, taken (4개 값으로 관리)
+  const [duplicationCheck, setDuplicationCheck] = useState("idle")
+
+    useEffect(() => {
+      const error = validationFn(fieldName, value)
+
+      if(error || !value) {
+        setDuplicationCheck("idle")
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        api.get(apiUrl, {
+          params: {[fieldName] : value}
+        })
+            .then((resp) => {
+              setDuplicationCheck(resp.data.available ? "available" : "taken")
+            })
+            .catch((error) => {
+              console.error(`${fieldName} 중복검사 실패:`, error);
+              setDuplicationCheck('idle');
+            })
+      }, 500)
+
+      return () => clearTimeout(timer);
+    }, [fieldName, value, apiUrl]); //실제로는 value만 바뀜, 허나 공식 리액트 권장사항.
+    return duplicationCheck;
+  };
+  //중복검사 로직 상태 String 값 available로 나와야 합격
+  const emailStatus = useDuplicateCheck("email", member.email, "/member/check-email", validation);
+  const extraEmailStatus = useDuplicateCheck("email", member.extraEmail, "/member/check-email", validation);
+  const nicknameStatus = useDuplicateCheck("nickname", member.nickname, "/member/check-nickname", validation);
+
+  // 이메일 인증에서 사용할 props
+  const [verification, setVerification] = useState(false); // 인증 완료 여부
+
+  // 유효성 검사, 중복체크에 통과하면, 버튼 활성화
+  const isDisabled = !passwordMatch || Object.values(passwordRules).some(r => !r) || Object.values(errors).some((e)=> e && e.length > 0) ||
+      emailStatus !== "available" || extraEmailStatus !== "available" || nicknameStatus !== "available" || !verification;
 
   //작성내용 제출
   const submit = (e) => {
     e.preventDefault()
 
-    axios.post(`/api/member/register`, member)
+    api.post(`/member/register`, member)
         .then((res) => {
           console.log("Content-Type", res.headers[`content-type`])
           navigate("/member")
@@ -113,27 +171,8 @@ function TestRegisterPage(props) {
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white shadow-lg rounded-2xl p-8 w-96">
           {/* 이메일 입력 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              이메일
-            </label>
-            <input
-                id="email"
-                name="email"
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="이메일을 입력하세요"
-                onBlur={(e)=> {
-                  setTouched((prev)=> ({...prev, email: true}))
-                  setErrors((prev)=> ({...prev, email: validation("email", e.target)}))
-                }}
-                onChange={change}
-            />{touched.email && errors.email &&
-              (<ul className={"mt-2 text-xs"}>
-              <li className={"text-red-500"}>{errors.email}</li>
-            </ul>)
-          }
-          </div>
-
+          <RegisterEmailField member={member} touched={touched} errors={errors} emailStatus={emailStatus}
+                              handleBlur={handleBlur} change={change} verification={verification} setVerification={setVerification}/>
           {/* 비밀번호 입력 */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -149,8 +188,9 @@ function TestRegisterPage(props) {
                   setTouched((prev)=> ({...prev, password: true}))
                 }}
                 onChange={passwordChange}
-            />{
-            touched.password &&
+            />
+            {/* 에러 메세지*/}
+            {touched.password &&
             (<ul className={"mt-2 text-xs"}>
               <li className={touched.password && passwordRules.length ? "text-blue-500" : "text-red-500"}>
                 비밀번호는 8자 ~ 16자 사이여야 합니다.
@@ -164,8 +204,7 @@ function TestRegisterPage(props) {
               <li className={passwordRules.special ? "text-blue-500" : "text-red-500"}>
                 비밀번호는 특수문자를 1개이상 포함하여야 합니다.
               </li>
-            </ul>)
-          }
+            </ul>)}
           </div>
           {/* 비밀번호 확인 */}
           <div className="mb-6">
@@ -182,7 +221,9 @@ function TestRegisterPage(props) {
                 setTouched((prev)=> ({...prev, passwordCheck: true}))
               }}
               onChange={passwordChange}
-          />{touched.passwordCheck &&
+          />
+            {/* 에러 메세지*/}
+            {touched.passwordCheck &&
             (<ul className={"mt-2 text-xs"}>
               <li className={passwordMatch ? "text-blue-500" : "text-red-500"}>
                 {passwordMatch ? `비밀번호가 일치합니다` : `비밀번호가 일치하지 않습니다.`}
@@ -199,15 +240,21 @@ function TestRegisterPage(props) {
                 name="extraEmail"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="추가 이메일을 입력하여주세요."
-                onBlur={(e)=> {
-                  setTouched((prev)=> ({...prev, extraEmail: true}))
-                  setErrors((prev)=> ({...prev, extraEmail: validation("extraEmail", e.target)}))
-                }}
+                onBlur={handleBlur}
                 onChange={change}
-            />{touched.extraEmail && errors.extraEmail &&
+            />
+            {/* 에러 메세지*/}
+            {touched.extraEmail && errors.extraEmail &&
               (<ul className={"mt-2 text-xs"}>
                 <li className={"text-red-500"}>{errors.extraEmail}</li>
               </ul>)}
+            {/* 중복 체크 메세지*/}
+            {touched.extraEmail && !errors.extraEmail && extraEmailStatus !== "idle" &&
+                (<ul className={"mt-2 text-xs"}>
+                  <li className={extraEmailStatus === "available" ? "text-blue-500" :"text-red-500"}>
+                    {extraEmailStatus === "available" ? "사용 가능한 이메일입니다." : "사용하실 수 없는 이메일입니다."}
+                  </li>
+                </ul>)}
           </div>
           {/* 닉네임 입력 */}
           <div className="mb-4">
@@ -219,16 +266,22 @@ function TestRegisterPage(props) {
                 name="nickname"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="닉네임을 입력하세요"
-                onBlur={(e)=> {
-                  setTouched((prev)=> ({...prev, nickname: true}))
-                  setErrors((prev)=> ({...prev, nickname: validation("nickname", e.target)}))
-                }}
+                onBlur={handleBlur}
                 onChange={change}
             />
+            {/* 에러 메세지*/}
             {touched.nickname && errors.nickname &&
                 (<ul className={"mt-2 text-xs"}>
                   <li className={"text-red-500"}>{errors.nickname}</li>
                 </ul>)}
+            {/* 중복체크 메세지 */}
+            {touched.nickname && !errors.nickname && nicknameStatus !== "idle" && (
+                <ul className={"mt-2 text-xs"}>
+                  <li className={nicknameStatus === "available" ? "text-blue-500" :"text-red-500"}>
+                    {nicknameStatus === "available" ? "사용 가능한 닉네임입니다." : "사용하실 수 없는 닉네임입니다."}
+                  </li>
+                </ul>
+            )}
           </div>
           {/* 버튼 영역 */}
           <div className="flex gap-2">
