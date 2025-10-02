@@ -1,56 +1,106 @@
+// src/test/stories/QnAList.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../../member/axiosInterceptor.js";
 
-const QnAList = () => {
-    const [boards, setBoards] = useState([]);
-    const [loading, setLoading] = useState(true);
+export default function QnAList() {
+    const [items, setItems] = useState([]);
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const size = 5;
     const navigate = useNavigate();
 
+    const fetchData = async (pageNum = 1) => {
+        try {
+            const body = {
+                cond: {
+                    qnaStatus: "WAITING", // 필요 없으면 null 가능
+                },
+                criteria: {
+                    page: pageNum,
+                    size,
+                },
+            };
+
+            const res = await api.post(
+                "http://localhost:8082/api/boards/qna/list",
+                body
+            );
+
+            setItems(res.data.items || []);
+            setTotal(res.data.page?.totalElements || 0);
+            setPage(pageNum);
+        } catch (err) {
+            console.error("QnA 목록 조회 실패:", err);
+        }
+    };
+
     useEffect(() => {
-        axios
-            .get(
-                "http://localhost:8082/api/boards?page=1&size=10&sort=id,desc&filters%5BcategoryId%5D=2&filters%5BpostStatus%5D=PUBLISHED&filters%5BisPublic%5D=true"
-            )
-            .then((res) => {
-                setBoards(res.data.items || []);
-            })
-            .catch((err) => {
-                console.error("데이터 요청 실패", err);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        fetchData(1);
     }, []);
 
-    if (loading) return <p>로딩중...</p>;
-    if (!boards.length)
-        return (
-            <div>
-                <p>게시글이 없습니다.</p>
-                <button onClick={() => navigate("/qna/register")}>QnA 등록</button>
-            </div>
-        );
+    const totalPages = Math.ceil(total / size);
 
     return (
-        <div>
-            <h3>게시글 목록 (QnA)</h3>
-            <button
-                onClick={() => navigate("/qna/register")}
-                style={{ marginBottom: "1rem" }}
-            >
-                QnA 등록
-            </button>
+        <div style={{ padding: 16 }}>
+            <h3>QnA 리스트 테스트</h3>
             <ul>
-                {boards.map((b) => (
-                    <li key={b.id}>
-                        <strong>{b.title}</strong> (id: {b.id}, 상태: {b.qnaStatus}, 공개여부:{" "}
-                        {b.isPublic ? "공개" : "비공개"})
+                {items.map((qna) => (
+                    <li key={qna.id} style={{ marginBottom: 8 }}>
+                        <strong
+                            style={{ cursor: "pointer", color: "blue" }}
+                            onClick={() => navigate(`/qna/read/${qna.id}`)}
+                        >
+                            {qna.title}
+                        </strong>{" "}
+                        ({qna.qnaStatus})
+                        <button
+                            onClick={() => navigate(`/qna/modify/${qna.id}`)}
+                            style={{
+                                marginLeft: 8,
+                                padding: "2px 6px",
+                                background: "#ffc107",
+                                border: "1px solid #ccc",
+                                cursor: "pointer",
+                            }}
+                        >
+                            수정
+                        </button>
+                        <button
+                            onClick={() => navigate(`/qna/delete/${qna.id}`)}
+                            style={{
+                                marginLeft: 4,
+                                padding: "2px 6px",
+                                background: "#dc3545",
+                                color: "white",
+                                border: "1px solid #ccc",
+                                cursor: "pointer",
+                            }}
+                        >
+                            삭제
+                        </button>
                     </li>
                 ))}
             </ul>
+
+            <div style={{ marginTop: 16 }}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                        key={p}
+                        onClick={() => fetchData(p)}
+                        style={{
+                            margin: "0 4px",
+                            padding: "4px 8px",
+                            background: p === page ? "#333" : "#eee",
+                            color: p === page ? "#fff" : "#000",
+                            border: "1px solid #ccc",
+                            cursor: "pointer",
+                        }}
+                    >
+                        {p}
+                    </button>
+                ))}
+            </div>
         </div>
     );
-};
-
-export default QnAList;
+}
