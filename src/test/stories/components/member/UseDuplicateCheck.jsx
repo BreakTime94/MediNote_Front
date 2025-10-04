@@ -29,7 +29,7 @@ function UseDuplicateCheck (fieldName, value, apiUrl, validationFn)  {
     }, 500)
 
     return () => clearTimeout(timer);
-  }, [fieldName, value, apiUrl]); //실제로는 value만 바뀜, 허나 공식 리액트 권장사항.
+  }, [value]); //실제로는 value만 바뀜, 허나 공식 리액트 권장사항은 의존성 배열을 다 넣는 것이다.
   return duplicationCheck;
 };
 

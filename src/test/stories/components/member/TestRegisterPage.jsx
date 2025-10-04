@@ -78,9 +78,8 @@ function TestRegisterPage(props) {
       setTouched((prev) => ({...prev, [name]: true}));
     }
 
-    // if(touched[name]) {
-    //   setErrors((prev)=> ({...prev, [name]: validation(name, value)}))
-    // }
+    setErrors((prev) => ({ ...prev, [name]: validation(name, value) }));
+
   }
 
   // register시에 발생할 수 있는 error 상태 모음

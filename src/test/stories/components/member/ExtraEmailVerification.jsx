@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import api from "./axiosInterceptor.js"
 import {show} from "../common/ui/toast/commonToast.jsx";
+import {useEmailTimer} from "./useEmailTimer.jsx";
 
 function RegisterExtraEmailField({member, touched, errors, emailStatus, handleBlur, change, verification, setVerification}) {
 
   const [verificationCode, setVerificationCode] = useState(""); // 사용자가 입력한 코드
   const [showCodeInput, setShowCodeInput] = useState(false); // 코드 입력창 표시 여부
-
+  //회원가입시에 사용했던 hook
+  const {leftTime, startTimer, formatTime, stopTimer} = useEmailTimer();
   // 인증메일 요청 (then/catch)
   const handleSendVerificationCode = () => {
     api
@@ -20,6 +22,7 @@ function RegisterExtraEmailField({member, touched, errors, emailStatus, handleBl
           }
           );
           setShowCodeInput(true);
+          startTimer()
         })
         .catch(() => {
           show.error({
@@ -41,6 +44,7 @@ function RegisterExtraEmailField({member, touched, errors, emailStatus, handleBl
             show.success({title: res.data.message});
             setVerification(true);
             setShowCodeInput(false);
+            stopTimer()
           } else {
             show.formerr({title: "인증 코드가 올바르지 않습니다."});
           }
@@ -68,11 +72,11 @@ function RegisterExtraEmailField({member, touched, errors, emailStatus, handleBl
               setShowCodeInput(false);
             }}
             value={member.extraEmail}
-            disabled={verification} // 인증 완료 시 수정 불가
+            disabled={verification || member.extraEmailVerified} // 인증 완료 시 수정 불가
         />
 
         {/* 인증 메일 요청 버튼 */}
-        {!errors.extraEmail && emailStatus==="available" && member.email !== member.extraEmail &&(
+        {!errors.extraEmail && emailStatus==="available" && member.email !== member.extraEmail && !member.extraEmailVerified &&(
             <button
                 type="button"
                 className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -94,6 +98,8 @@ function RegisterExtraEmailField({member, touched, errors, emailStatus, handleBl
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
               />
+              {leftTime &&
+                  (<span className={"text-xs text-gray-500 my-auto font-bold"}>{formatTime(leftTime)}</span>)}
               <button
                   type="button"
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-amber-100"
@@ -125,7 +131,7 @@ function RegisterExtraEmailField({member, touched, errors, emailStatus, handleBl
             </ul>
         )}
         {/* extraEmail과 email 중복 방지 */}
-        {touched.extraEmail && !errors.extraEmail && member.email === member.extraEmail &&
+        {touched.extraEmail && !errors.extraEmail && member.extraEmail && member.email === member.extraEmail &&
             (<ul className={"mt-2 text-xs"}>
               <li className={"text-red-500"}>추가 이메일과 같은 이메일을 사용하실 수 없습니다.</li>
             </ul>)}
