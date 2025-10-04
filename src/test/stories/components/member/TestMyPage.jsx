@@ -12,13 +12,19 @@ function TestMyPage() {
     nickname: "",
     extraEmail: "",
     profileImagePath: "",
-    regDate: ""
+    extraEmailVerified: "",
+    regDate: "",
   });
+
+  const[newMemberDto, setNewMemberDto] = useState({
+    nickname: "",
+    extraEmail: "",
+    profileImagePath: "",
+    extraEmailVerified: "",
+  })
   //인증여부
   const [verification, setVerification] = useState(false);
 
-  //읽기전용인지 아닌지(Mypage Component에서 수정도 같이 진행)
-  const[readOnly, setReadOnly] = useState(true);
   //최초 focus 여부
   const[touched, setTouched] = useState({
     extraEmail: false,
@@ -32,6 +38,8 @@ function TestMyPage() {
     setTouched((prev) => ({ ...prev, [name]: true }));
     setErrors((prev) => ({ ...prev, [name]: validation(name, value) }));
   };
+
+  const [valueChange, setValueChange] = useState(false);
 
   const validation = (name, value) => {
     switch (name) {
@@ -54,13 +62,13 @@ function TestMyPage() {
     return "";
   }
 
-  const extraEmailStatus = UseDuplicateCheck("email", memberDto.extraEmail, "/member/check/email", validation);
-  const nicknameStatus = UseDuplicateCheck("nickname", memberDto.nickname, "/member/check/nickname", validation);
+  const extraEmailStatus = UseDuplicateCheck("email", newMemberDto.extraEmail, "/member/check/email", validation);
+  const nicknameStatus = UseDuplicateCheck("nickname", newMemberDto.nickname, "/member/check/nickname", validation);
 
   //라우터 이동
   const navigate = useNavigate();
 
-
+  //처음 Mypage로 값 가져오는 것
   useEffect(() => {
     axios.get("/api/member/get", {
       withCredentials: true
@@ -69,11 +77,17 @@ function TestMyPage() {
           console.log("Content-Type", res.headers["content-type"])
           console.log("로그인 된 멤버 정보", res.data)
           setMemberDto(res.data)
+          setNewMemberDto(res.data)
         })
         .catch((error) => {
           console.log("error : ", error)
         })
   }, []);
+
+  useEffect(()=> {
+    const changed = newMemberDto.extraEmail !== memberDto.extraEmail || newMemberDto.nickname !== memberDto.nickname || newMemberDto.profileImagePath !== memberDto.profileImagePath;
+    setValueChange(changed);
+  },[newMemberDto])
 
   const logout = (e) => {
     e.preventDefault()
@@ -90,18 +104,20 @@ function TestMyPage() {
 
   const change = (e) => {
     const {name, value} = e.target;
-    e.preventDefault();
-    setMemberDto((prev) => ({...prev, [name]: value}))
-  }
+    setNewMemberDto((prev) => ({...prev, [name]: value}))
+    setErrors((prev) => ({ ...prev, [name]: validation(name, value) }));
+  }gi
 
   const updateMember = (e) => {
     e.preventDefault();
-    setReadOnly(false);
-  }
-
-  const updateDone = (e) => {
-    e.preventDefault();
-    setReadOnly(true);
+    api.post("/", newMemberDto)
+        .then((resp) => {
+          console.log(resp);
+          navigate("/member/mypage")
+        })
+        .catch((err)=> {
+          console.log(err);
+        })
   }
 
   return(
@@ -115,32 +131,40 @@ function TestMyPage() {
             </div>
             <div className={"m-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">닉네임</label>
-              <input className={"border w-full"} name={"nickname"} value={memberDto.nickname} readOnly={readOnly} onChange={change}/>
+              <input className={"border w-full"} name={"nickname"} value={newMemberDto.nickname} onChange={change} onBlur={handleBlur}/>
             </div>
-            <ExtraEmailVerification member={memberDto} touched={touched} errors={errors} emailStatus={extraEmailStatus} handleBlur={handleBlur}
-            change={change} verification={verification}/>
+            {/* 에러 메세지*/}
+            {touched.nickname && errors.nickname &&
+                (<ul className={"mt-2 text-xs"}>
+                  <li className={"text-red-500"}>{errors.nickname}</li>
+                </ul>)}
+            {/* 중복체크 메세지 */}
+            {touched.nickname && !errors.nickname && nicknameStatus !== "idle" && (
+                <ul className={"mt-2 text-xs"}>
+                  <li className={nicknameStatus === "available" ? "text-blue-500" :"text-red-500"}>
+                    {nicknameStatus === "available" ? "사용 가능한 닉네임입니다." : "사용하실 수 없는 닉네임입니다."}
+                  </li>
+                </ul>
+            )}
+            <ExtraEmailVerification member={newMemberDto} touched={touched} errors={errors} emailStatus={extraEmailStatus} handleBlur={handleBlur}
+            change={change} verification={verification} setVerification={setVerification}/>
             <div className={"m-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">프로필이미지</label>
-              <input className={"border w-full"} name={"profileImagePath"} value={memberDto.profileImagePath || "이미지가 없습니다."} readOnly={true}/>
+              <input className={"border w-full"} name={"profileImagePath"} value={newMemberDto.profileImagePath || "이미지가 없습니다."} readOnly={true}/>
             </div>
             <div className={"m-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">계정등록일</label>
               <input className={"border w-full"} name={"regDate"} value={memberDto.regDate} readOnly={true}/>
             </div>
-            {readOnly && (<div className={"m-2"}>
+             <div className={"m-2"}>
               <LogoutButton children = {"로그아웃"} onClick={logout} />
-            </div>)}
+            </div>
             <div  className={"m-2 text-sm"}>
-              {readOnly &&
-                (<button type={"button"} className="flex-1 bg-purple-300 text-gray-700 px-2 py-1 rounded-lg shadow
-                     hover:bg-purple-400 active:bg-purple-500 cursor-pointer" onClick={updateMember}>
-                수정하기
-              </button>)}
-              {!readOnly &&
-                  (<button type={"button"} className="flex-1 bg-purple-300 text-gray-700 px-2 py-1 rounded-lg shadow
-                     hover:bg-purple-400 active:bg-purple-500 cursor-pointer" onClick={updateDone}>
-                    수정완료
-                  </button>)}
+              <button type={"button"} className={ valueChange === true ? "flex-1 bg-purple-300 text-gray-700 px-2 py-1 rounded-lg shadow hover:bg-purple-400 active:bg-purple-500 cursor-pointer" :
+              "flex-1 bg-gray-300 text-amber-50 px-2 py-1 rounded-lg shadow"}
+                      onClick={updateMember} disabled={!valueChange}>
+              수정하기
+            </button>
             </div>
           </div>
         </div>
