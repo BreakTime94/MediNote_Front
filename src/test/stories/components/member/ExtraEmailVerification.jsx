@@ -46,15 +46,16 @@ function RegisterExtraEmailField({member, setMember, touched, errors, emailStatu
           if (res.data.available === true) {
             show.success({title: res.data.message});
             setMember((prev) => ({...prev, extraEmailVerified: true}))
-            // axios.post("/api/member/modify", member, {
-            //   withCredentials: true
-            // })
-            //     .then((res)=> {
-            //       console.log("update 완료", res)
-            //     })
-            //     .catch(() => {
-            //       show.error({title: "알수 없는 오류로 인증이 반영되지 않았습니다."});
-            //     })
+            const updated= {...member, extraEmailVerified: true} // member는 state(비동기 상태)이며, api 호출이 다 끝나고 난 후에, 리랜더링되며 반영된다.
+            axios.patch("/api/member/modify", updated, {
+              withCredentials: true
+            })
+                .then((res)=> {
+                  console.log("update 완료", res)
+                })
+                .catch(() => {
+                  show.error({title: "알수 없는 오류로 인증이 반영되지 않았습니다."});
+                })
             setVerification(true);
             setShowCodeInput(false);
             stopTimer()
