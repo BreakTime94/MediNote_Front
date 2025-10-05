@@ -1,7 +1,9 @@
 import React, {useState} from "react";
-import axios from "axios";
+import api from "./axiosInterceptor.js";
 import {useNavigate} from "react-router-dom";
-import GoogleLoginButton from "./GoogleLoginButton.jsx";
+import GoogleLoginButton from "../../member/GoogleLoginButton.jsx";
+
+
 
 function testUIPage(props) {
   const [loginDto, setLoginDto] = useState({email: "", password: ""})
@@ -24,12 +26,12 @@ function testUIPage(props) {
   }
 
   const login = e => {
-    console.log("login 정보",loginDto)
+    console.log( "login 정보",loginDto)
     e.preventDefault()
-    axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
+    api.post("/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
           console.log("Content-Type", resp.headers['content-type'])
-          navigate("/member/mypage")
+          navigate("/health/measurement")
         })
         .catch((error) => {
           console.log("error", error)
