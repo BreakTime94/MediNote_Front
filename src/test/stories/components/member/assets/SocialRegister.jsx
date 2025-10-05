@@ -102,7 +102,7 @@ export default function SocialRegister() {
           {/* extraEmail과 email 중복 방지 */}
           {touched.extraEmail && !errors.extraEmail && info.email === info.extraEmail &&
               (<ul className={"mt-2 text-xs"}>
-                <li className={"text-red-500"}>추가 이메일과 같은 이메일을 사용하실 수 없습니다.</li>
+                <li className={"text-red-500"}>주 이메일과 동일한 이메일을 사용하실 수 없습니다.</li>
               </ul>)}
           <div className="mb-4">
             <input type="text" name={"nickname"} placeholder="닉네임" className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"

@@ -41,22 +41,22 @@ function TestRegisterPage(props) {
     switch (name) {
       case "email":
         if (!value) return "이메일은 필수입니다.";
-        if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
+        if (!/^(?!.*\s)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
+          return "문자 내 공백은 불가하며, 올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
       case "extraEmail":
         if (!value) return "추가 이메일은 필수입니다.";
-        if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
+        if (!/^(?!.*\s)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
+          return "문자 내 공백은 불가하며, 올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
       case "nickname":
         if (!value) return "닉네임은 필수입니다.";
-        if (!/^[가-힣a-zA-Z0-9]{2,16}$/.test(value)) {
-          return "닉네임은 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
+        if (!/^(?!.*\s)[가-힣a-zA-Z0-9]{2,16}$/.test(value)) {
+          return "문자 내 공백은 불가하며, 닉네임은 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
         }
         break;
 
@@ -91,6 +91,7 @@ function TestRegisterPage(props) {
     number: /[0-9]/.test(password.password),
     letter: /[a-zA-Z]/.test(password.password),
     special: /[!@#$%^&*]/.test(password.password),
+    noSpace: !/\s/.test(password.password),
   };
 
   // 비밀번호 & 비밀번호가 확인은 onChange로 값이 바뀔 때 마다 계산
@@ -171,6 +172,9 @@ function TestRegisterPage(props) {
               </li>
               <li className={passwordRules.special ? "text-blue-500" : "text-red-500"}>
                 비밀번호는 특수문자를 1개이상 포함하여야 합니다.
+              </li>
+              <li className={passwordRules.noSpace ? "text-blue-500" : "text-red-500"}>
+                비밀번호에는 공백이 포함될 수 없습니다.
               </li>
             </ul>)}
           </div>

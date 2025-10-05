@@ -12,15 +12,16 @@ function TestMyPage() {
     nickname: "",
     extraEmail: "",
     profileImagePath: "",
-    extraEmailVerified: "",
+    extraEmailVerified: null,
     regDate: "",
   });
 
   const[newMemberDto, setNewMemberDto] = useState({
-    nickname: "",
     extraEmail: "",
+    nickname: "",
     profileImagePath: "",
-    extraEmailVerified: "",
+    profileMimeType: "",
+    extraEmailVerified: null,
   })
   //인증여부
   const [verification, setVerification] = useState(false);
@@ -45,15 +46,15 @@ function TestMyPage() {
     switch (name) {
       case "extraEmail":
         if (!value) return "추가 이메일은 필수입니다.";
-        if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
+        if (!/^(?!.*\s)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
+          return "문자 내 공백은 불가하며, 올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
       case "nickname":
         if (!value) return "닉네임은 필수입니다.";
-        if (!/^[가-힣a-zA-Z0-9]{2,16}$/.test(value)) {
-          return "닉네임은 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
+        if (!/^(?!.*\s)[가-힣a-zA-Z0-9]{2,16}$/.test(value)) {
+          return "문자 내 공백은 불가하며, 닉네임은 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
         }
         break;
       default:
@@ -106,11 +107,11 @@ function TestMyPage() {
     const {name, value} = e.target;
     setNewMemberDto((prev) => ({...prev, [name]: value}))
     setErrors((prev) => ({ ...prev, [name]: validation(name, value) }));
-  }gi
+  }
 
   const updateMember = (e) => {
     e.preventDefault();
-    api.post("/", newMemberDto)
+    api.post("/member/modify", newMemberDto)
         .then((resp) => {
           console.log(resp);
           navigate("/member/mypage")
@@ -127,11 +128,11 @@ function TestMyPage() {
           <div className={"gap-2 w-96 border-1"}>
             <div className={"m-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">아이디</label>
-              <input className={"border w-full"} name={"email"} id={"name"} value={memberDto.email} readOnly={true}/>
+              <input className={"border w-full"} name={"email"} id={"email"} value={memberDto.email} readOnly={true}/>
             </div>
             <div className={"m-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">닉네임</label>
-              <input className={"border w-full"} name={"nickname"} value={newMemberDto.nickname} onChange={change} onBlur={handleBlur}/>
+              <input className={"border w-full"} name={"nickname"} id={"nickname"} value={newMemberDto.nickname} onChange={change} onBlur={handleBlur}/>
             </div>
             {/* 에러 메세지*/}
             {touched.nickname && errors.nickname &&
@@ -146,7 +147,7 @@ function TestMyPage() {
                   </li>
                 </ul>
             )}
-            <ExtraEmailVerification member={newMemberDto} touched={touched} errors={errors} emailStatus={extraEmailStatus} handleBlur={handleBlur}
+            <ExtraEmailVerification member={newMemberDto} setMember={setNewMemberDto} touched={touched} errors={errors} emailStatus={extraEmailStatus} handleBlur={handleBlur}
             change={change} verification={verification} setVerification={setVerification}/>
             <div className={"m-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">프로필이미지</label>
