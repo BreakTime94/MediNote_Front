@@ -24,7 +24,7 @@ function testUIPage(props) {
   }
 
   const login = e => {
-    console.log( "login 정보",loginDto)
+    console.log("login 정보",loginDto)
     e.preventDefault()
     axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
