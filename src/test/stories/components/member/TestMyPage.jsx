@@ -111,7 +111,7 @@ function TestMyPage() {
 
   const updateMember = (e) => {
     e.preventDefault();
-    api.post("/member/modify", newMemberDto)
+    axios.post("/member/modify", newMemberDto)
         .then((resp) => {
           console.log(resp);
           navigate("/member/mypage")
