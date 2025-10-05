@@ -32,8 +32,8 @@ function TestMeasurement() {
   const [chronicSearch, setChronicSearch] = useState("");
   const [allergySearch, setAllergySearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
-
   const searchTimer = useRef(null);
 
   //기저질환, 알러지 목록 불러오기
@@ -67,23 +67,20 @@ function TestMeasurement() {
     setForm(prev => ({...prev, searchKeyword: keyword}));
 
     // 이전 타이머 취소
-    if (searchTimer.current) {
-      clearTimeout(searchTimer.current);
-    }
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+
 
     if (keyword.length > 1) {
       // 300ms 후에 검색 실행
       searchTimer.current = setTimeout(async () => {
         try {
-          const res = await api.get(
-              `/health/medication/search?keyword=${keyword}`
-          );
-          const results = Array.isArray(res.data)
-              ? res.data
-              : res.data.content || [];
+          const res = await api.get(`/health/medication/search`, {params: {keyword}});
+          const results = Array.isArray(res.data) ? res.data : [];
           setForm(prev => ({...prev, searchResults: results}));
         } catch (err) {
           console.error("검색 실패", err);
+        } finally {
+            setIsSearching(false);
         }
       }, 300);
     } else {
@@ -96,8 +93,7 @@ function TestMeasurement() {
     if (
         !form.medications.find(
             (m) => (m.id || m.medicationId) === (med.id || med.medicationId)
-        )
-    ) {
+        )) {
       setForm((prev) => ({
         ...prev,
         medications: [...prev.medications, med],
@@ -112,8 +108,7 @@ function TestMeasurement() {
     setForm((prev) => ({
       ...prev,
       medications: prev.medications.filter(
-          (m) => (m.id || m.medicationId) !== id
-      )
+          (m) => (m.id || m.medicationId) !== id )
     }));
   };
 
@@ -124,7 +119,7 @@ function TestMeasurement() {
       return {
         ...prev,
         [field]: exists
-            ? prev[field].filter((x) => x !== id)
+            ? prev[field].filter(x => x !== id)
             : [...prev[field], id]
       };
     });
@@ -490,6 +485,7 @@ function TestMeasurement() {
               className="border border-gray-300 rounded-md p-2 w-20"
           />
           <span>mg/dL</span>
+          <span>mg/dL</span>
         </div>
 
         <div className="flex items-center space-x-2 mb-4">
@@ -512,7 +508,7 @@ function TestMeasurement() {
               type="submit"
               disabled={isLoading}
               className={`flex items-center bg-pink-300 text-white px-12 py-2 rounded hover:bg-pink-400 active:bg-pink-500 cursor-pointer ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
               }`}
           >
             {isLoading ? "저장 중..." : "저장"}
