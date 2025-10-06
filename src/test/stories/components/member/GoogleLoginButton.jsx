@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import googleLogo from "./assets/web_light_rd_na.svg";
+import {show} from "../common/ui/toast/commonToast.jsx";
 
 export default function GoogleLoginButton() {
   const navigate = useNavigate();
@@ -27,6 +28,13 @@ export default function GoogleLoginButton() {
       } else if (event.data.status === "NEED_REGISTER") {
         // 신규 회원 → 회원가입 컴포넌트로 (state로 데이터 전달)
         navigate("/social/signup", { state: event.data });
+      } else {
+        // 그 외 에러 관련
+        show.error({
+          title: event.data.status,
+          desc: event.data.message
+        })
+        navigate("/member")
       }
     };
 
