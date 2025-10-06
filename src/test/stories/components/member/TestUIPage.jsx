@@ -2,12 +2,11 @@ import React, {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import GoogleLoginButton from "./GoogleLoginButton.jsx";
+import {show} from "../common/ui/toast/commonToast.jsx";
 
 function testUIPage(props) {
   const [loginDto, setLoginDto] = useState({email: "", password: ""})
   const navigate = useNavigate();
-
-  console.log("useNavigate 두둥 등장")
 
   const register = e => {
     e.preventDefault();
@@ -24,15 +23,48 @@ function testUIPage(props) {
   }
 
   const login = e => {
-    console.log("login 정보",loginDto)
     e.preventDefault()
     axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
-          console.log("Content-Type", resp.headers['content-type'])
+          show.success({
+            title: resp.status,
+            disc: resp.message
+          })
           navigate("/member/mypage")
         })
         .catch((error) => {
-          console.log("error", error)
+          const {code, message} = error.response?.data || {};
+          console.error("[LOGIN ERROR]", code, message);
+
+          switch (code) {
+            case "MEMBER_NOT_FOUND":
+              show.error({
+                title: message || "존재하지 않는 회원입니다.",
+                desc: "회원가입 페이지로 이동합니다.",
+              });
+              navigate("/member/signup");
+              break;
+
+            case "MEMBER_PASSWORD_INVALID":
+              show.error({
+                title: message || "비밀번호가 일치하지 않습니다.",
+                desc: "비밀번호를 다시 확인해주세요.",
+              });
+              break;
+
+            case "MEMBER_DELETED":
+              show.error({
+                title: message || "삭제된 회원입니다.",
+                desc: "복구를 원하시면 고객센터로 문의해주세요.",
+              });
+              break;
+
+            default:
+              show.error({
+                title: message || "로그인 중 오류가 발생했습니다.",
+                desc: "잠시 후 다시 시도해주세요.",
+              });
+          }
     });
   }
 
