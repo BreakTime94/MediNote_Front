@@ -27,8 +27,8 @@ function testUIPage(props) {
     axios.post("/api/member/auth/login", loginDto, {withCredentials: true})
         .then((resp) => {
           show.success({
-            title: resp.status,
-            disc: resp.message
+            title: resp.data.status,
+            disc: resp.data.message
           })
           navigate("/member/mypage")
         })
