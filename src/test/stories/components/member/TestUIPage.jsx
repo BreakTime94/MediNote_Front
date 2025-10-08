@@ -85,7 +85,7 @@ function testUIPage(props) {
           </div>
 
           {/* 비밀번호 입력 */}
-          <div className="mb-6">
+          <div className="mb-2">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               비밀번호
             </label>
@@ -97,7 +97,18 @@ function testUIPage(props) {
                 placeholder="비밀번호를 입력하세요" onChange={handleChange}
             />
           </div>
-
+          <div className={"mb-3"}>
+            <div className={"flex justify-center items-center"}>
+              <div className={"flex-1 flex justify-center items-center"}>
+                <span className={"text-xs cursor-pointer hover:underline"} onClick={() => {
+                  navigate("/member/findEmail")
+                }}>아이디 찾기</span>
+              </div>
+              <div className={"flex-1 flex justify-center items-center"}>
+                <span className={"text-xs cursor-pointer hover:underline"}>비밀번호 찾기</span>
+              </div>
+            </div>
+          </div>
           {/* 버튼 영역 */}
           <div className="flex gap-2">
             <button
