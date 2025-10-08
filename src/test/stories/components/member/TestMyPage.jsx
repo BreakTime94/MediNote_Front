@@ -111,15 +111,28 @@ function TestMyPage() {
 
   const updateMember = (e) => {
     e.preventDefault();
-    axios.post("/member/modify", newMemberDto)
+    axios.patch("api/member/modify", newMemberDto)
         .then((resp) => {
           console.log(resp);
+          setValueChange(false)
           navigate("/member/mypage")
         })
         .catch((err)=> {
           console.log(err);
         })
   }
+
+  const withdraw = (e) => {
+    e.preventDefault();
+    api.delete("/member/remove",{
+     data: {email: memberDto.email}
+    }).then((resp) => {
+      console.log(resp);
+      navigate(`/member`);
+    })
+  }
+
+  const isDisabled= Object.values(errors).some((e)=> e.length > 0) || extraEmailStatus !== "available" || nicknameStatus !== "available" || !valueChange;
 
   return(
       <>
@@ -157,15 +170,21 @@ function TestMyPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">계정등록일</label>
               <input className={"border w-full"} name={"regDate"} value={memberDto.regDate} readOnly={true}/>
             </div>
-             <div className={"m-2"}>
+            <div className={"m-2 text-sm"}>
               <LogoutButton children = {"로그아웃"} onClick={logout} />
-            </div>
-            <div  className={"m-2 text-sm"}>
-              <button type={"button"} className={ valueChange === true ? "flex-1 bg-purple-300 text-gray-700 px-2 py-1 rounded-lg shadow hover:bg-purple-400 active:bg-purple-500 cursor-pointer" :
-              "flex-1 bg-gray-300 text-amber-50 px-2 py-1 rounded-lg shadow"}
-                      onClick={updateMember} disabled={!valueChange}>
-              수정하기
-            </button>
+              <button type={"button"} className={ isDisabled === false ? "flex-1 bg-purple-300 text-gray-700 px-2 py-1 rounded-lg shadow hover:bg-purple-400 active:bg-purple-500 cursor-pointer" :
+              "flex-1 bg-gray-300 text-amber-50 px-2 py-1 rounded-lg shadow mx-3"}
+                      onClick={updateMember} disabled={isDisabled}>
+                수정하기
+              </button>
+              <button type={"button"} className={"flex-1 bg-red-300 text-black px-2 py-1 rounded-lg shadow hover:bg-red-500 hover:font-bold cursor-pointer"}
+              onClick={withdraw}>
+                계정 탈퇴하기
+              </button>
+              <button type={"button"} className={"flex-1 bg-blue-300 text-white px-2 py-1 rounded-lg shadow hover:bg-blue-500 hover:font-bold cursor-pointer"}
+              onClick={ () => navigate("/member/mypage/changepassword")}>
+                비밀번호 변경
+              </button>
             </div>
           </div>
         </div>

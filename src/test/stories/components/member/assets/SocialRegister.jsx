@@ -6,7 +6,7 @@ import UseDuplicateCheck from "../UseDuplicateCheck.jsx";
 export default function SocialRegister() {
   const location = useLocation();
   const socialData = location.state.dto; // SuccessHandler에서 받은 dto handler에서 브라우저에 Script 형태로 dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌
-  const [info, setInfo] = useState({ ...socialData, extraEmail: "" });
+  const [info, setInfo] = useState({ ...socialData, nickname:socialData.nickname?.trim().replace(/\s+/g, '') || '', extraEmail: "" });
   const navigate = useNavigate();
   //에러 모음 상태값
   const [errors, setErrors] = useState({});
@@ -28,14 +28,14 @@ export default function SocialRegister() {
     switch (name) {
       case "extraEmail":
         if (!value) return "추가 이메일은 필수입니다.";
-        if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
+        if (!/^(?!.*\s)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
+          return "이메일은 공백이 없어야 하며, 올바른 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
       case "nickname":
         if (!value) return "닉네임은 필수입니다.";
-        if (!/^[가-힣a-zA-Z0-9 ]{2,16}$/.test(value)) { //끝에 공백 하나를 추가해서 공백도 포함하게 (구글 아이디는 저렇게 공백이 들어가 있는 경우가 많음)
-          return "닉네임은 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
+        if (!/^(?!.*\s)[가-힣a-zA-Z0-9 ]{2,16}$/.test(value)) { //끝에 공백 하나를 추가해서 공백도 포함하게 (구글 아이디는 저렇게 공백이 들어가 있는 경우가 많음)
+          return "닉네임은 공백없이 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
         }
         break;
       default:
