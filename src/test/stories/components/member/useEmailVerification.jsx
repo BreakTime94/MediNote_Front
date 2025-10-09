@@ -9,9 +9,12 @@ export function useEmailVerification() {
   const { leftTime, startTimer, formatTime, stopTimer } = useEmailTimer();
 
   // 인증메일 요청 (then/catch)
-  const sendCode = (email) => {
+  const sendCode = (email, type) => {
     api
-        .post("/member/email/send", null, { params: { email } })
+        .post("/member/email/send", {
+          "email": email,
+          "type": type,
+        })
         .then((resp) => {
           show.success({
             title: resp.data.message,
@@ -29,11 +32,12 @@ export function useEmailVerification() {
   };
 
   // 인증코드 확인 (then/catch)
-  const verifyCode = (email, verification, setVerification) => {
+  const verifyCode = (email, verification, setVerification, type) => {
     api
         .post("/member/email/verify", {
-          email,
+          email: email,
           code: verificationCode,
+          type: type
         })
         .then((res) => {
           if (res.data.available === true) {

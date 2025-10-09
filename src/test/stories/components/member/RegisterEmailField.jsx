@@ -42,7 +42,7 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
             <button
                 type="button"
                 className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                onClick={()=> sendCode(member.email)}
+                onClick={()=> sendCode(member.email, "signUp")}
             >
               인증메일 요청
             </button>
@@ -66,7 +66,7 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
                   type="button"
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-amber-100"
                   disabled={verification}
-                  onClick={() => verifyCode(member.email, verification, setVerification)}
+                  onClick={() => verifyCode(member.email, verification, setVerification, "signUp")}
               >
                 확인
               </button>
