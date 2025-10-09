@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 import api from "./axiosInterceptor.js";
 import ExtraEmailVerification from "./ExtraEmailVerification.jsx";
 import UseDuplicateCheck from "./UseDuplicateCheck.jsx";
+import {show} from "../common/ui/toast/commonToast.jsx";
 
 function TestMyPage() {
   const [memberDto, setMemberDto] = useState({
@@ -129,6 +130,10 @@ function TestMyPage() {
     }).then((resp) => {
       console.log(resp);
       navigate(`/member`);
+    }).catch((err) => {
+      show.error(
+          {title: "오류가 발생하였습니다."}
+      )
     })
   }
 
