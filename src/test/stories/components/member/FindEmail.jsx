@@ -1,5 +1,9 @@
 import React, {useState} from "react";
 import {useEmailVerification} from "./useEmailVerification.jsx";
+import {show} from "../common/ui/toast/commonToast.jsx";
+import axios from "axios";
+import api from "./axiosInterceptor.js";
+import {useNavigate} from "react-router-dom";
 
 export default function FindEmail() {
   const [extraEmail, setExtraEmail] = useState("");
@@ -11,7 +15,7 @@ export default function FindEmail() {
   const[touched, setTouched] = useState({
     extraEmail : false,
   })
-
+  const navigate = useNavigate();
   const handleBlur = (e) => {
     const { name, value } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
@@ -79,7 +83,11 @@ export default function FindEmail() {
             <button
                 type="button"
                 className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                onClick={() => sendCode(extraEmail)}
+                onClick={() => {
+                  sendCode(extraEmail, "find")
+                  window.alert("인증코드를 발송하였습니다. 만약 코드가 도착하지 않았다면, 입력하신 이메일이 회원정보와 일치하지 않거나 " +
+                      "추가 이메일 인증을 하지 않았는지 확인하여 주시기 바랍니다.")
+                }}
             >
               인증메일 요청
             </button>
@@ -103,20 +111,35 @@ export default function FindEmail() {
                   type="button"
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-amber-100"
                   disabled={verification}
-                  onClick={() => verifyCode(extraEmail, verification, setVerification)}
+                  onClick={() => {
+                    verifyCode(extraEmail, verification, setVerification, "find")
+                  }}
               >
                 확인
               </button>
+            </div>
+        )}
               {!showCodeInput && verification && (
                   <button
                       type="button"
                       className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                      onClick={() => {
+                        api.post("/member/find/email", {extraEmail})
+                            .then((resp)=> {
+                              window.alert("회원님의 아이디는 " + resp.data.email + " 입니다.")
+                              navigate("/member")
+                            }).catch((error) => {
+                              show.info({
+                                title: error.response?.data?.status,
+                                message: error.response?.data?.message
+                              })
+                              setTimeout(()=> navigate("/member"), 2000)
+                        })
+                      }}
                   >
                     이메일 확인하기
                   </button>
               )}
-            </div>
-        )}
         {!showCodeInput && verification && (
             <ul className="mt-2 text-xs">
               <li className="text-blue-500">이메일 인증이 완료되었습니다.</li>
