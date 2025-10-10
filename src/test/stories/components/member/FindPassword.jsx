@@ -122,7 +122,7 @@ export default function FindPassword() {
                   })
                 }}
             >
-              이메일 확인하기
+              비밀번호 재발급하기
             </button>
         )}
 
