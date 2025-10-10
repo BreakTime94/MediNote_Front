@@ -13,6 +13,15 @@ const mockData = [
   { measuredDate: "2025-10-05T21:00:00", height: 160, weight: 51, bloodPressureSystolic: 121, bloodPressureDiastolic: 79, bloodSugar: 94, sleepHours: 6 },
 ];
 
+// TODO: 백엔드 연결 후 아래 코드로 교체
+// useEffect(() => {
+//   api.get("/health/measurement/chart").then(res => {
+//     const dailyData = latestByDate(res.data);
+//     const filtered = filterByPeriod(dailyData, period === "ALL" ? "ALL" : parseInt(period));
+//     setChartData(filtered);
+//   });
+// }, [period]);
+
 //하루 중 가장 최신 데이터
 const latestByDate = (list) => {
   const grouped = {}; //짜를 키(key)로, 해당 날짜의 최신 데이터를 값(value)로 저장할 객체
@@ -71,11 +80,11 @@ function TestMeasurementChart(props) {
         ))}
       </div>
       {/* 차트 영역 */}
-      <ResponsiveContainer width="100%" heigth={400}>
+      <ResponsiveContainer width="100%" height={400}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray = "3 3"/>
           <XAxis
-            dataKey="data"
+            dataKey="date"
             tickFormatter={(data) => dayjs(data).format("MM/DD")}
             stroke="#888" />
           <YAxis stroke="#888" />
@@ -85,7 +94,7 @@ function TestMeasurementChart(props) {
           <Legend verticalAlign="top" height={36} />
 
           {/* 수치형 데이터 라인들 */}
-          <Line type="monotone" dataKey="height" name="키(cm)" stroke="#7C3AED" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="height" name="키(cm)" stroke="#8B5CF6" strokeWidth={2} dot={false} />
           <Line type="monotone" dataKey="weight" name="체중(kg)" stroke="#EC4899" strokeWidth={2} dot={false} />
           <Line type="monotone" dataKey="bloodPressureSystolic" name="혈압(수축)" stroke="#F59E0B" strokeWidth={2} dot={false} />
           <Line type="monotone" dataKey="bloodPressureDiastolic" name="혈압(이완)" stroke="#10B981" strokeWidth={2} dot={false} />
