@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef} from "react";
+import { useNavigate } from "react-router-dom";
 import api from "./axiosInterceptor.js";
 
 // ✅ 초기 상태
@@ -22,7 +23,7 @@ const initialHealthForm = {
   bloodPressureSystolic: "",
   bloodPressureDiastolic: "",
   bloodSugar: "",
-  sleepHours: ""
+  sleepHours: "",
 };
 
 function TestMeasurement() {
@@ -34,6 +35,7 @@ function TestMeasurement() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const searchTimer = useRef(null);
+  const navigate = useNavigate();
 
   // ✅ 기저질환 / 알러지 목록 가져오기
   useEffect(() => {
@@ -41,7 +43,7 @@ function TestMeasurement() {
       try {
         const [chronicRes, allergyRes] = await Promise.all([
           api.get("/health/condition/chronicDiseases"),
-          api.get("/health/condition/allergies")
+          api.get("/health/condition/allergies"),
         ]);
         setChronicOptions(chronicRes.data || []);
         setAllergyOptions(allergyRes.data || []);
@@ -77,7 +79,7 @@ function TestMeasurement() {
             searchResults: Array.isArray(res.data) ? res.data : [],
           }));
         } catch (err) {
-          console.error("검색 실패", err);
+          console.error("💥 약품 검색 실패:", err);
         }
       }, 300);
     } else {
@@ -87,15 +89,14 @@ function TestMeasurement() {
 
   // ✅ 복용약 추가
   const addMedication = (med) => {
-    if (
-      !form.medications.find(
-        (m) => (m.id || m.medicationId) === (med.id || med.medicationId)
-      )
-    ) {
+    // id 또는 drugCode 둘 다 커버
+    const medId = med.id ?? med.drugCode; // null 병합연산자(왼쪽 없으면 오른쪽)
+
+    if (!form.medications.some((m) => (m.id ?? m.drugCode) === medId)) {
       setForm((prev) => ({
         ...prev,
         medications: [...prev.medications, med],
-        medicationIds: [...prev.medicationIds, med.id || med.medicationId],
+        medicationIds: [...prev.medicationIds, medId],
         searchKeyword: "",
         searchResults: [],
       }));
@@ -158,6 +159,8 @@ function TestMeasurement() {
       const res = await api.post("/health/measurement", payload);
       alert("저장 성공!");
       console.log("저장 성공:", res.data);
+      navigate("/health/measurement/list"); //리스트로 이동
+
       setForm(initialHealthForm);
       setChronicSearch("");
       setAllergySearch("");
@@ -174,26 +177,18 @@ function TestMeasurement() {
     <div className="flex flex-col mb-4">
       <span className="text-gray-700 font-semibold mb-1">{label}</span>
       <div className="flex space-x-4">
-        <label className="flex items-center space-x-1">
-          <input
-            type="radio"
-            name={name}
-            value="Y"
-            checked={form[name] === "Y"}
-            onChange={handleChange}
-          />
-          <span>Y</span>
-        </label>
-        <label className="flex items-center space-x-1">
-          <input
-            type="radio"
-            name={name}
-            value="N"
-            checked={form[name] === "N"}
-            onChange={handleChange}
-          />
-          <span>N</span>
-        </label>
+        {["Y", "N"].map((val) => (
+          <label key={val} className="flex items-center space-x-1">
+            <input
+              type="radio"
+              name={name}
+              value={val}
+              checked={form[name] === val}
+              onChange={handleChange}
+            />
+            <span>{val}</span>
+          </label>
+        ))}
       </div>
     </div>
   );
@@ -232,6 +227,7 @@ function TestMeasurement() {
       <RadioYN name="smoking" label="흡연 여부" />
       <RadioYN name="drinking" label="음주 여부" />
 
+      {/* 음주 세부 입력 */}
       {form.drinking === "Y" && (
         <div className="ml-4 space-y-3">
           <div className="flex items-center space-x-2">
@@ -381,7 +377,8 @@ function TestMeasurement() {
                   onClick={() => addMedication(med)}
                   className="p-2 hover:bg-gray-100 cursor-pointer"
                 >
-                  {med.nameKo} ({med.company})
+                  {/* ✅ nameKoCompany 사용 */}
+                  {med.nameKoCompany || med.nameKo}
                 </li>
               ))}
             </ul>
@@ -392,12 +389,10 @@ function TestMeasurement() {
                 key={med.id || med.medicationId}
                 className="bg-pink-200 text-sm px-2 py-1 rounded flex items-center space-x-1"
               >
-                <span>{med.nameKo}</span>
+                <span>{med.nameKoCompany || med.nameKo}</span>
                 <button
                   type="button"
-                  onClick={() =>
-                    removeMedication(med.id || med.medicationId)
-                  }
+                  onClick={() => removeMedication(med.id || med.medicationId)}
                   className="text-red-600"
                 >
                   ✕
@@ -485,6 +480,7 @@ function TestMeasurement() {
         </div>
       </div>
 
+      {/* 저장 버튼 */}
       <div className="flex justify-center mt-6">
         <button
           type="submit"
