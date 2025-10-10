@@ -4,23 +4,16 @@ import {LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Car
 import dayjs from "dayjs";
 
 //임시 데이터ㅓ - 나중에 백이랑 연결 예정
-const mockData = [
-  { measuredDate: "2025-10-01T08:00:00", height: 160, weight: 52, bloodPressureSystolic: 120, bloodPressureDiastolic: 80, bloodSugar: 90, sleepHours: 6 },
-  { measuredDate: "2025-10-01T22:00:00", height: 160, weight: 52, bloodPressureSystolic: 118, bloodPressureDiastolic: 79, bloodSugar: 92, sleepHours: 7 },
-  { measuredDate: "2025-10-02T21:00:00", height: 160, weight: 51, bloodPressureSystolic: 117, bloodPressureDiastolic: 78, bloodSugar: 88, sleepHours: 6 },
-  { measuredDate: "2025-10-03T22:30:00", height: 160, weight: 50, bloodPressureSystolic: 122, bloodPressureDiastolic: 82, bloodSugar: 100, sleepHours: 8 },
-  { measuredDate: "2025-10-04T20:15:00", height: 160, weight: 50, bloodPressureSystolic: 119, bloodPressureDiastolic: 80, bloodSugar: 91, sleepHours: 7 },
-  { measuredDate: "2025-10-05T21:00:00", height: 160, weight: 51, bloodPressureSystolic: 121, bloodPressureDiastolic: 79, bloodSugar: 94, sleepHours: 6 },
-];
+// const mockData = [
+//   { measuredDate: "2025-10-01T08:00:00", height: 160, weight: 52, bloodPressureSystolic: 120, bloodPressureDiastolic: 80, bloodSugar: 90, sleepHours: 6 },
+//   { measuredDate: "2025-10-01T22:00:00", height: 160, weight: 52, bloodPressureSystolic: 118, bloodPressureDiastolic: 79, bloodSugar: 92, sleepHours: 7 },
+//   { measuredDate: "2025-10-02T21:00:00", height: 160, weight: 51, bloodPressureSystolic: 117, bloodPressureDiastolic: 78, bloodSugar: 88, sleepHours: 6 },
+//   { measuredDate: "2025-10-03T22:30:00", height: 160, weight: 50, bloodPressureSystolic: 122, bloodPressureDiastolic: 82, bloodSugar: 100, sleepHours: 8 },
+//   { measuredDate: "2025-10-04T20:15:00", height: 160, weight: 50, bloodPressureSystolic: 119, bloodPressureDiastolic: 80, bloodSugar: 91, sleepHours: 7 },
+//   { measuredDate: "2025-10-05T21:00:00", height: 160, weight: 51, bloodPressureSystolic: 121, bloodPressureDiastolic: 79, bloodSugar: 94, sleepHours: 6 },
+// ];
 
-// TODO: 백엔드 연결 후 아래 코드로 교체
-// useEffect(() => {
-//   api.get("/health/measurement/chart").then(res => {
-//     const dailyData = latestByDate(res.data);
-//     const filtered = filterByPeriod(dailyData, period === "ALL" ? "ALL" : parseInt(period));
-//     setChartData(filtered);
-//   });
-// }, [period]);
+
 
 //하루 중 가장 최신 데이터
 const latestByDate = (list) => {
@@ -51,10 +44,19 @@ function TestMeasurementChart(props) {
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    const dailyData = latestByDate(mockData);
-    const filtered = filterByPeriod(dailyData, period === "ALL" ? "ALL" : parseInt(period));
-    setChartData(filtered);
-  },[period]);
+    fetchChartData();
+  }, [period]);
+
+  const fetchChartData = async () => {
+    try{
+      const res = await api.get("/health/measurement/chart");
+      const dailyData = latestByDate(res.data);
+      const filtered = filterByPeriod(dailyData, period === "ALL" ? "ALL" : parseInt(period));
+      setChartData(filtered);
+    }catch (err) {
+      console.error("차트 불러오기 실패 : ", err);
+    }
+  };
 
   return (
     <div className="max-2-6xl mx-auto p-6 bg-white shadow-md rounded-xl">
