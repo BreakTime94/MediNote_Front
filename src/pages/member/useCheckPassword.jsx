@@ -1,6 +1,5 @@
 import {useState, useEffect} from "react"
-import axios from "axios";
-
+import api from "../../components/common/api/axiosInterceptor.js"
 
 export default function useCheckPassword(password, delay = 500) {
 
@@ -32,7 +31,7 @@ export default function useCheckPassword(password, delay = 500) {
     setLoading(true);
     setError("");
 
-    axios.post("/api/member/check/password", { password: debouncedValue })
+    api.post("/member/check/password", { password: debouncedValue })
         .then((resp) => {
           // 서버가 "VALID_PASSWORD"로 응답하면 성공
           if (resp.data.available === true) {
