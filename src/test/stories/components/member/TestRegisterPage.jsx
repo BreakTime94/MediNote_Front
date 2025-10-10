@@ -1,7 +1,9 @@
 import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import api from "./axiosInterceptor.js";
-import RegisterEmailField from "./EmailVerification.jsx";
+
+import duplicateCheck from "./UseDuplicateCheck.jsx";
+import RegisterEmailField from "./RegisterEmailField.jsx";
 
 function TestRegisterPage(props) {
   // Router의 이동수단
@@ -40,22 +42,22 @@ function TestRegisterPage(props) {
     switch (name) {
       case "email":
         if (!value) return "이메일은 필수입니다.";
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
+        if (!/^(?!.*\s)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
+          return "문자 내 공백은 불가하며, 올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
       case "extraEmail":
         if (!value) return "추가 이메일은 필수입니다.";
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          return "올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
+        if (!/^(?!.*\s)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)) {
+          return "문자 내 공백은 불가하며, 올바른 이메일 형식이어야 합니다. ex) aaa@bbb.ccc 등";
         }
         break;
 
       case "nickname":
         if (!value) return "닉네임은 필수입니다.";
-        if (!/^[가-힣a-zA-Z0-9]{2,10}$/.test(value)) {
-          return "닉네임은 한글, 영문, 숫자만 사용하여 2~10자까지 가능합니다.";
+        if (!/^(?!.*\s)[가-힣a-zA-Z0-9]{2,16}$/.test(value)) {
+          return "문자 내 공백은 불가하며, 닉네임은 한글, 영문, 숫자만 사용하여 2~16자까지 가능합니다.";
         }
         break;
 
@@ -77,9 +79,8 @@ function TestRegisterPage(props) {
       setTouched((prev) => ({...prev, [name]: true}));
     }
 
-    // if(touched[name]) {
-    //   setErrors((prev)=> ({...prev, [name]: validation(name, value)}))
-    // }
+    setErrors((prev) => ({ ...prev, [name]: validation(name, value) }));
+
   }
 
   // register시에 발생할 수 있는 error 상태 모음
@@ -91,6 +92,7 @@ function TestRegisterPage(props) {
     number: /[0-9]/.test(password.password),
     letter: /[a-zA-Z]/.test(password.password),
     special: /[!@#$%^&*]/.test(password.password),
+    noSpace: !/\s/.test(password.password),
   };
 
   // 비밀번호 & 비밀번호가 확인은 onChange로 값이 바뀔 때 마다 계산
@@ -109,42 +111,10 @@ function TestRegisterPage(props) {
     setMember((prev) => ({...prev, [name] : value}));
   }
 
-
-  //이메일, 추가이메일, 닉네임 중복검사를 위한 함수
-  const useDuplicateCheck = (fieldName, value, apiUrl, validationFn) => {
-    //function 내 state
-    // 이메일, 추가이메일, 닉네임 중복검사를 위한 상태관리 idle, checking, available, taken (4개 값으로 관리)
-  const [duplicationCheck, setDuplicationCheck] = useState("idle")
-
-    useEffect(() => {
-      const error = validationFn(fieldName, value)
-
-      if(error || !value) {
-        setDuplicationCheck("idle")
-        return;
-      }
-
-      const timer = setTimeout(() => {
-        api.get(apiUrl, {
-          params: {[fieldName] : value}
-        })
-            .then((resp) => {
-              setDuplicationCheck(resp.data.available ? "available" : "taken")
-            })
-            .catch((error) => {
-              console.error(`${fieldName} 중복검사 실패:`, error);
-              setDuplicationCheck('idle');
-            })
-      }, 500)
-
-      return () => clearTimeout(timer);
-    }, [fieldName, value, apiUrl]); //실제로는 value만 바뀜, 허나 공식 리액트 권장사항.
-    return duplicationCheck;
-  };
   //중복검사 로직 상태 String 값 available로 나와야 합격
-  const emailStatus = useDuplicateCheck("email", member.email, "/member/check-email", validation);
-  const extraEmailStatus = useDuplicateCheck("email", member.extraEmail, "/member/check-email", validation);
-  const nicknameStatus = useDuplicateCheck("nickname", member.nickname, "/member/check-nickname", validation);
+  const emailStatus = duplicateCheck("email", member.email, "/member/check/email", validation);
+  const extraEmailStatus = duplicateCheck("email", member.extraEmail, "/member/check/email", validation);
+  const nicknameStatus = duplicateCheck("nickname", member.nickname, "/member/check/nickname", validation);
 
   // 이메일 인증에서 사용할 props
   const [verification, setVerification] = useState(false); // 인증 완료 여부
@@ -204,6 +174,9 @@ function TestRegisterPage(props) {
               <li className={passwordRules.special ? "text-blue-500" : "text-red-500"}>
                 비밀번호는 특수문자를 1개이상 포함하여야 합니다.
               </li>
+              <li className={passwordRules.noSpace ? "text-blue-500" : "text-red-500"}>
+                비밀번호에는 공백이 포함될 수 없습니다.
+              </li>
             </ul>)}
           </div>
           {/* 비밀번호 확인 */}
@@ -249,11 +222,16 @@ function TestRegisterPage(props) {
                 <li className={"text-red-500"}>{errors.extraEmail}</li>
               </ul>)}
             {/* 중복 체크 메세지*/}
-            {touched.extraEmail && !errors.extraEmail && extraEmailStatus !== "idle" &&
+            {touched.extraEmail && !errors.extraEmail && extraEmailStatus !== "idle" && member.email !== member.extraEmail &&
                 (<ul className={"mt-2 text-xs"}>
                   <li className={extraEmailStatus === "available" ? "text-blue-500" :"text-red-500"}>
                     {extraEmailStatus === "available" ? "사용 가능한 이메일입니다." : "사용하실 수 없는 이메일입니다."}
                   </li>
+                </ul>)}
+            {/* extraEmail과 email 중복 방지 */}
+            {touched.extraEmail && !errors.extraEmail && member.extraEmail === member.email &&
+                (<ul className={"mt-2 text-xs"}>
+                  <li className={"text-red-500"}>로그인용 이메일과 같은 이메일을 사용하실 수 없습니다.</li>
                 </ul>)}
           </div>
           {/* 닉네임 입력 */}
