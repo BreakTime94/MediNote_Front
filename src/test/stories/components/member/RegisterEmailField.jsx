@@ -1,58 +1,20 @@
-import React, {useState} from "react";
-import api from "./axiosInterceptor.js"
-import {show} from "../common/ui/toast/commonToast.jsx";
-import {useEmailTimer} from "./useEmailTimer.jsx";
+import React from "react";
+import {useEmailVerification} from "./useEmailVerification.jsx";
 
 function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, change, verification, setVerification }) {
 
-  const [verificationCode, setVerificationCode] = useState(""); // 사용자가 입력한 코드
-  const [showCodeInput, setShowCodeInput] = useState(false); // 코드 입력창 표시 여부
-  const {leftTime, startTimer, formatTime, stopTimer} = useEmailTimer();
+  const {
+    verificationCode,
+    setVerificationCode,
+    showCodeInput,
+    setShowCodeInput,
+    sendCode,
+    verifyCode,
+    leftTime,
+    formatTime,
+  } = useEmailVerification();
 
-  // 인증메일 요청 (then/catch)
-  const handleSendVerificationCode = () => {
-    api
-        .post("/member/email/send", null, {
-          params: {email: member.email}
-        })
-        .then((resp) => {
-          show.success({
-            title : resp.data.message,
-            desc: resp.data.desc
-          }
-          );
-          startTimer();
-          setShowCodeInput(true);
-        })
-        .catch(() => {
-          show.error({
-            title : "인증 메일 발송에 실패했습니다.",
-            desc: "잠시 후 다시 시도하여주시기 바랍니다."}
-          );
-        });
-  };
 
-  // 인증코드 확인 (then/catch)
-  const handleVerifyCode = () => {
-    api
-        .post("/member/email/verify", {
-          email: member.email,
-          code: verificationCode,
-        })
-        .then((res) => {
-          if (res.data.available === true) {
-            show.success({title: res.data.message});
-            setVerification(true);
-            setShowCodeInput(false);
-            stopTimer()
-          } else {
-            show.formerr({title: "인증 코드가 올바르지 않습니다."});
-          }
-        })
-        .catch(() => {
-          show.error({title: "인증 확인 중 오류가 발생했습니다."});
-        });
-  };
 
   return (
       <div className="mb-4">
@@ -80,7 +42,7 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
             <button
                 type="button"
                 className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                onClick={handleSendVerificationCode}
+                onClick={()=> sendCode(member.email, "signUp")}
             >
               인증메일 요청
             </button>
@@ -104,7 +66,7 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
                   type="button"
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-amber-100"
                   disabled={verification}
-                  onClick={handleVerifyCode}
+                  onClick={() => verifyCode(member.email, verification, setVerification, "signUp")}
               >
                 확인
               </button>
