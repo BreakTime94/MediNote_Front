@@ -33,6 +33,20 @@ function TestMeasurementList(props) {
     navigate(`/health/measurement/${id}/edit`);
   };
 
+  //삭제 처리
+  const handleDelete = async (id) => {
+    if(!window.confirm("삭제하시겠습니까?")) return;
+    try{
+      await api.delete(`/health/measurement/${id}`);
+      alert("삭제 완료되었습니다.");
+
+      setList((prev) => prev.filter((item) => item.id !== id));
+    }catch (err) {
+      console.error("삭제 실패 : ", err);
+      alert("삭제 중 오류 발생하였습니다.");
+    }
+  };
+
   //상태별 색상 설정
   const  statusColor = (status) => {
     if(status === "ACTIVE") return "text-gray-600"; //활성화
@@ -124,11 +138,17 @@ function TestMeasurementList(props) {
             </td>
 
             {/* 수정 버튼 */}
-            <td className="p-2 border border-gray-200">
+            <td className="p-2 border border-gray-200 space-x-2">
               <button
                 onClick={() => handleEdit(item.id)}
-                className="text-sm bg-pink-400 text-white px-3 py-1 rounded hover:bg-pink-500 transition">
-                수정 / 삭제
+                className="text-sm bg-purple-400 text-white px-3 py-1 rounded hover:bg-purple-500 transition">
+                수정
+              </button>
+
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="text-sm bg-red-400 text-white px-3 py-1 rounded hover:bg-red-500 transition">
+                삭제
               </button>
             </td>
           </tr>
@@ -146,4 +166,4 @@ function TestMeasurementList(props) {
   )
 }
 
-export default TestMeasurementList
+export default TestMeasurementList;
