@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import api from "./axiosInterceptor.js";
-import RegisterEmailField from "./EmailVerification.jsx";
+
 import duplicateCheck from "./UseDuplicateCheck.jsx";
+import RegisterEmailField from "./RegisterEmailField.jsx";
 
 function TestRegisterPage(props) {
   // Router의 이동수단

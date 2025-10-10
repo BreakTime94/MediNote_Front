@@ -13,9 +13,7 @@ function RegisterExtraEmailField({member, setMember, touched, errors, emailStatu
   // 인증메일 요청 (then/catch)
   const handleSendVerificationCode = () => {
     api
-        .post("/member/email/send", null, {
-          params: {email: member.extraEmail}
-        })
+        .post("/member/email/send", {email: member.extraEmail, type: "extraEmailVerify"})
         .then((resp) => {
           show.success({
             title : resp.data.message,
@@ -39,6 +37,7 @@ function RegisterExtraEmailField({member, setMember, touched, errors, emailStatu
         .post("/member/email/verify", {
           email: member.extraEmail,
           code: verificationCode,
+          type: "extraEmailVerify",
         }, {
           withCredentials: true
         })

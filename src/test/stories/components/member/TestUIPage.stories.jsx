@@ -6,6 +6,8 @@ import QnAList from "./QnAList.jsx";
 import QnARegister from "./QnARegister.jsx";
 import SocialRegister from "./assets/SocialRegister.jsx";
 import ChangePassword from "./ChangePassword.jsx";
+import FindEmail from "./FindEmail.jsx";
+import FindPassword from "./FindPassword.jsx";
 
 
 export default {
@@ -20,7 +22,9 @@ export default {
       {path: "/qna", element: <QnAList/>},
       {path: "/qna/register", element: <QnARegister/>},
       {path: "/social/signup", element: <SocialRegister/>},
-      {path: "/member/mypage/changepassword", element: <ChangePassword/>}
+      {path: "/member/mypage/changepassword", element: <ChangePassword/>},
+      {path:"/member/findEmail", element: <FindEmail/>},
+      {path: "/member/resetPassword", element: <FindPassword/>}
     ]
   }
 };
