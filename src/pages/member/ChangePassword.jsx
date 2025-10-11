@@ -3,6 +3,7 @@ import useCheckPassword from "./useCheckPassword.jsx";
 import axios from "axios";
 import {show} from "@/test/stories/components/common/ui/toast/commonToast.jsx";
 import {useNavigate} from "react-router-dom";
+import api from "@/components/common/api/axiosInterceptor.js";
 
 export default function ChangePassword() {
   const navigate = useNavigate();
@@ -54,13 +55,13 @@ export default function ChangePassword() {
   || !oldPassword;
 
   const changeConfirm = () => {
-    axios.patch("/api/member/change/password", newPassword)
+    api.patch("/member/change/password", newPassword)
         .then((resp) => {
           show.success({
             title: resp.data.status,
             desc: resp.data.message
           })
-          navigate("/member")
+          navigate("/member/login")
         })
         .catch((error) => {
           show.error({
@@ -71,12 +72,14 @@ export default function ChangePassword() {
   }
 
   return(
-      <div className="flex items-center justify-center bg-white pt-16">
-        <div className="flex mb-4 mx-auto bg-white shadow-lg rounded-2xl border p-8 w-120">
-          <h3>비밀번호 변경</h3>
-          <div className={"w-full flex-1"}>
-            <label className={"block"}>기존 비밀번호</label>
-            <input id="oldPassword" name="oldPassword" type="password" className={"border-1"} placeholder={"현재 비밀번호를 입력하여주세요."}
+      <div className="flex flex-col items-center justify-center bg-white">
+        <div className="mb-4 mx-auto bg-white shadow-lg rounded-2xl border p-8 w-full">
+          <div className={"w-full mb-4"}>
+            <h3 className={"font-bold"}>비밀번호 변경</h3>
+          </div>
+          <div className={"mb-2"}>
+            <label className={"block text-sm font-medium text-gray-700 mb-1"}>기존 비밀번호</label>
+            <input id="oldPassword" name="oldPassword" type="password" className={"w-full px-3 py-1 border rounded-lg focus:outline-none"} placeholder={"현재 비밀번호를 입력하여주세요."}
             onChange={oldPasswordChange}  onBlur={()=> {
               setTouched((prev)=> ({...prev, oldPassword: true}))
             }}/>
@@ -87,11 +90,17 @@ export default function ChangePassword() {
               {valid && !error && !loading && (<li className={"text-blue-500"}>비밀번호가 일치합니다.</li>)}
             </ul>)}
           </div>
-          <div className={"w-full flex-1"}>
-            <label className={"block"}>신규비밀번호</label>
-            <input id="password" name="password" type="password" className={"border-1"} placeholder={"변경하실 비밀번호를 입력하여주세요."} onChange={passwordChange}
+          <div className={"mb-2"}>
+            <label className={"block text-sm font-medium text-gray-700 mb-1"}>신규비밀번호</label>
+            <input id="password" name="password" type="password" className={" w-full px-3 py-1 border rounded-lg focus:outline-none"} placeholder={"변경하실 비밀번호를 입력하여주세요."} onChange={passwordChange}
                    onBlur={()=> {setTouched((prev)=> ({...prev, password: true}))}}/>
-            {touched.password &&
+            {oldPassword === newPassword.password && oldPassword && newPassword &&
+                (<ul className={"mt-2 text-xs"}>
+                  <li className={"text-red-500"}>
+                    기존 비밀번호와 동일하게 설정하실 수 없습니다.
+                  </li>
+                </ul>)}
+            {touched.password && oldPassword !== newPassword.password &&
                 (<ul className={"mt-2 text-xs"}>
                   <li className={touched.password && passwordRules.length ? "text-blue-500" : "text-red-500"}>
                     비밀번호는 8자 ~ 16자 사이여야 합니다.
@@ -110,9 +119,9 @@ export default function ChangePassword() {
                   </li>
                 </ul>)}
           </div>
-          <div className={"w-full flex-1"}>
-            <label className={"block"}>신규비밀번호 확인</label>
-            <input id="passwordCheck" name="passwordCheck" type="password" className={"border-1"} placeholder={"변경하실 비밀번호를 다시 입력하여주세요."} onChange={passwordChange}
+          <div className={"mb-2"}>
+            <label className={"block text-sm font-medium text-gray-700 mb-1"}>신규비밀번호 확인</label>
+            <input id="passwordCheck" name="passwordCheck" type="password" className={" w-full px-3 py-1 border rounded-lg focus:outline-none"} placeholder={"변경하실 비밀번호를 다시 입력하여주세요."} onChange={passwordChange}
                    onBlur={()=> {setTouched((prev)=> ({...prev, passwordCheck: true}))}}/>
             {/* 에러 메세지*/}
             {touched.passwordCheck &&
@@ -122,9 +131,9 @@ export default function ChangePassword() {
                   </li>
                 </ul>)}
           </div>
-          <div className={"w-full flex-1"}>
+          <div className={"w-full text-center mt-4"}>
             <button type="submit"
-                    className={`flex-1  text-white py-2 rounded-lg
+                    className={`flex-1 w-full text-white px-3 py-1 rounded-lg
                        ${isDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-pink-300 hover:bg-pink-400 active:bg-pink-500 cursor-pointer" }`}
                     disabled={isDisabled}
                     onClick={changeConfirm}
