@@ -10,8 +10,7 @@ export function useEmailVerification() {
 
   // 인증메일 요청 (then/catch)
   const sendCode = (email, type) => {
-    api
-        .post("/member/email/send", {
+    api.post("/member/email/send", {
           "email": email,
           "type": type,
         })
