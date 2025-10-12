@@ -13,7 +13,7 @@ function SiteHeader() {
         <header className="w-full bg-white px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* 좌측 로고 영역 */}
-                <div className="flex items-center">
+                <div className="flex items-center hover:cursor-pointer" onClick={()=>{navigate("/")}}>
                     {/* 로고 플레이스홀더 */}
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-r from-[#ff9bd4] to-[#c89cff] rounded-full flex items-center justify-center">
