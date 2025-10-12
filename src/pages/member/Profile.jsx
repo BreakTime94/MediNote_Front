@@ -4,9 +4,10 @@ import api from "../../components/common/api/axiosInterceptor.js";
 import ExtraEmailVerification from "./ExtraEmailVerification.jsx";
 import UseDuplicateCheck from "./UseDuplicateCheck.jsx";
 import {show} from "@/test/stories/components/common/ui/toast/commonToast.jsx";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 function Profile() {
-
+  const {setMember} = useAuthStore.getState(); // 스토어 접근
   const [memberDto, setMemberDto] = useState({
     email: "",
     nickname: "",
@@ -101,7 +102,9 @@ function Profile() {
     api.patch("/member/modify", newMemberDto)
         .then((resp) => {
           console.log(resp);
-          setValueChange(false)
+          setValueChange(false);
+          setMember(newMemberDto);
+          setMemberDto(newMemberDto);
           navigate("/member/mypage")
         })
         .catch((err)=> {
@@ -110,11 +113,14 @@ function Profile() {
   }
 
   const withdraw = (e) => {
+    if(!window.confirm("정말 삭제하시겠습니까?")) return;
     e.preventDefault();
     api.delete("/member/remove",{
      data: {email: memberDto.email}
     }).then((resp) => {
       console.log(resp);
+      setMember(null);
+      localStorage.removeItem("auth-storage");
       navigate(`/`);
     }).catch(() => {
       show.error(

@@ -12,6 +12,13 @@ export function useAsideNav({
   const [activeId, setActiveId] = useState(initialId);
   const [activeComponent, setActiveComponent] = useState(null);
 
+  useEffect(() => {
+    if (!activeComponent && initialId && componentMap[initialId]) {
+      setActiveComponent(initialId);
+    }
+  }, []);
+
+
   // 2. 버튼 클릭 핸들러 (handleAction)
   const handleAction = useCallback((type, id) => {
     if (type === "component") {

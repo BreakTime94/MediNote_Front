@@ -9,8 +9,10 @@ export const useAuthStore = create(
     persist(
         (set) => ({
           member: null,       // 로그인 사용자 정보
-          loading: true,      // 초기 로딩
+          loading: false,      // 초기 로딩
+
           setMember: (data) => set({ member: data }),
+
           logout: async () => {
             try {
               await api.post("/member/auth/logout");
@@ -18,9 +20,10 @@ export const useAuthStore = create(
             set({ member: null });
           },
           fetchMember: async () => {
+            set({loading: true})
             try {
               const res = await api.get("/member/get");
-              set({ member: res.data, loading: false });
+              set({ member: res.data.member, loading: false });
             } catch {
               set({ member: null, loading: false });
             }
