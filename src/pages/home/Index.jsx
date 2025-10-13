@@ -1,9 +1,10 @@
 import React from "react";
+import SummarySection from "../health/SummarySection.jsx";
 
 function Index(){
     return(
         <div>
-            <p>이것은 인덱스 페이지</p>
+          <SummarySection />
         </div>
     );
 }
