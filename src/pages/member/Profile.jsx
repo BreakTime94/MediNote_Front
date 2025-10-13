@@ -4,8 +4,10 @@ import api from "../../components/common/api/axiosInterceptor.js";
 import ExtraEmailVerification from "./ExtraEmailVerification.jsx";
 import UseDuplicateCheck from "./UseDuplicateCheck.jsx";
 import {show} from "@/test/stories/components/common/ui/toast/commonToast.jsx";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
-function MyPage() {
+function Profile() {
+  const {setMember} = useAuthStore.getState(); // 스토어 접근
   const [memberDto, setMemberDto] = useState({
     email: "",
     nickname: "",
@@ -100,7 +102,9 @@ function MyPage() {
     api.patch("/member/modify", newMemberDto)
         .then((resp) => {
           console.log(resp);
-          setValueChange(false)
+          setValueChange(false);
+          setMember(newMemberDto);
+          setMemberDto(newMemberDto);
           navigate("/member/mypage")
         })
         .catch((err)=> {
@@ -109,11 +113,14 @@ function MyPage() {
   }
 
   const withdraw = (e) => {
+    if(!window.confirm("정말 삭제하시겠습니까?")) return;
     e.preventDefault();
     api.delete("/member/remove",{
      data: {email: memberDto.email}
     }).then((resp) => {
       console.log(resp);
+      setMember(null);
+      localStorage.removeItem("auth-storage");
       navigate(`/`);
     }).catch(() => {
       show.error(
@@ -127,15 +134,18 @@ function MyPage() {
   return(
       <>
         {memberDto &&
-        <div className={"flex items-center justify-center pt-16"}>
-          <div className={"gap-2 w-96 border-1"}>
-            <div className={"m-2"}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">아이디</label>
-              <input className={"border w-full"} name={"email"} id={"email"} value={memberDto.email} readOnly={true}/>
+        <div className={"flex flex-col items-center justify-center bg-white"}>
+          <div className={"mb-4 border-1 rounded-2xl p-8 w-full"}>
+            <div className={"w-full mb-4"}>
+              <h3 className={"font-bold"}>회원정보</h3>
             </div>
-            <div className={"m-2"}>
+            <div className={"mb-2"}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">아이디</label>
+              <input className={"px-3 py-1 border rounded-lg w-full"} name={"email"} id={"email"} value={memberDto.email} readOnly={true}/>
+            </div>
+            <div className={"mb-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">닉네임</label>
-              <input className={"border w-full"} name={"nickname"} id={"nickname"} value={newMemberDto.nickname} onChange={change} onBlur={handleBlur}/>
+              <input className={"px-3 py-1 border rounded-lg w-full"} name={"nickname"} id={"nickname"} value={newMemberDto.nickname} onChange={change} onBlur={handleBlur}/>
             </div>
             {/* 에러 메세지*/}
             {touched.nickname && errors.nickname &&
@@ -152,27 +162,23 @@ function MyPage() {
             )}
             <ExtraEmailVerification member={newMemberDto} setMember={setNewMemberDto} touched={touched} errors={errors} emailStatus={extraEmailStatus} handleBlur={handleBlur}
             change={change} verification={verification} setVerification={setVerification}/>
-            <div className={"m-2"}>
+            <div className={"mb-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">프로필이미지</label>
-              <input className={"border w-full"} name={"profileImagePath"} value={newMemberDto.profileImagePath || "이미지가 없습니다."} readOnly={true}/>
+              <input className={"px-3 py-1 border rounded-lg w-full"} name={"profileImagePath"} value={newMemberDto.profileImagePath || "이미지가 없습니다."} readOnly={true}/>
             </div>
-            <div className={"m-2"}>
+            <div className={"mb-2"}>
               <label className="block text-sm font-medium text-gray-700 mb-1">계정등록일</label>
-              <input className={"border w-full"} name={"regDate"} value={memberDto.regDate} readOnly={true}/>
+              <input className={"px-3 py-1 border rounded-lg w-full"} name={"regDate"} value={memberDto.regDate} readOnly={true}/>
             </div>
-            <div className={"m-2 text-sm"}>
+            <div className={"m-2 text-sm flex"}>
               <button type={"button"} className={ isDisabled === false ? "flex-1 bg-purple-300 text-gray-700 px-2 py-1 rounded-lg shadow hover:bg-purple-400 active:bg-purple-500 cursor-pointer" :
-              "flex-1 bg-gray-300 text-amber-50 px-2 py-1 rounded-lg shadow mx-3"}
+              "flex-1 bg-gray-300 text-amber-50 px-2 py-1 rounded-lg shadow mx-2"}
                       onClick={updateMember} disabled={isDisabled}>
                 수정하기
               </button>
               <button type={"button"} className={"flex-1 bg-red-300 text-black px-2 py-1 rounded-lg shadow hover:bg-red-500 hover:font-bold cursor-pointer"}
-              onClick={withdraw}>
+                      onClick={withdraw}>
                 계정 탈퇴하기
-              </button>
-              <button type={"button"} className={"flex-1 bg-blue-300 text-white px-2 py-1 rounded-lg shadow hover:bg-blue-500 hover:font-bold cursor-pointer"}
-              onClick={ () => navigate("/member/change/password")}>
-                비밀번호 변경
               </button>
             </div>
           </div>
@@ -181,4 +187,4 @@ function MyPage() {
       </>
   );
 }
-export default MyPage
+export default Profile

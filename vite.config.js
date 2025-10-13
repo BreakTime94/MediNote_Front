@@ -19,6 +19,16 @@ export default defineConfig({
     },
   },
 
+  //recharts
+  optimizeDeps: {
+    include: ['recharts'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/, /recharts/],
+    },
+  },
+
   test: {
     environment: 'jsdom',
     // 브라우저 DOM 환경
