@@ -1,7 +1,7 @@
 import { useState } from "react";
-import api from "./axiosInterceptor";
+import api from "../../components/common/api/axiosInterceptor.js";
 import { useEmailTimer } from "./useEmailTimer";
-import {show} from "../common/ui/toast/commonToast.jsx";
+import {show} from "@/test/stories/components/common/ui/toast/commonToast.jsx";
 
 export function useEmailVerification() {
   const [verificationCode, setVerificationCode] = useState("");
@@ -10,7 +10,8 @@ export function useEmailVerification() {
 
   // 인증메일 요청 (then/catch)
   const sendCode = (email, type) => {
-    api.post("/member/email/send", {
+    api
+        .post("/member/email/send", {
           "email": email,
           "type": type,
         })
