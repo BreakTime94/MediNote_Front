@@ -128,7 +128,7 @@ export default function FindEmail() {
                           api.post("/member/find/email", {extraEmail})
                               .then((resp)=> {
                                 window.alert("회원님의 아이디는 " + resp.data.email + " 입니다.")
-                                navigate("/member")
+                                navigate("/member/login")
                               }).catch((error) => {
                                 show.info({
                                   title: error.response?.data?.status,
