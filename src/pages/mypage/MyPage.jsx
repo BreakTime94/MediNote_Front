@@ -2,17 +2,69 @@ import Profile from "@/pages/member/Profile.jsx";
 import ChangePassword from "@/pages/member/ChangePassword.jsx";
 import AsideNav from "@/components/common/nav/AsideNav.jsx";
 import {useAsideNav} from "@/components/common/hooks/useAsideNav.jsx";
+import {useAsideNavMyPage} from "@/components/common/hooks/useAsideNavMyPage.jsx";
+import MeasurementList from "@/pages/health/MeasurementList.jsx";
+import MeasurementEdit from "@/pages/health/MeasurementEdit.jsx";
+import React, { useState } from "react";
+import MeasurementChart from "@/pages/health/MeasurementChart.jsx";
 
 export default function MyPage() {
+  const [editId, setEditId] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
+
   const navItems = [
     { id: "profile", label: "프로필 정보", actionType: "component"},
     { id: "change-password", label: "비밀번호 변경", actionType: "component"},
+    { id: "measurementlist", label: "내 건강정보 리스트", actionType: "component" },
+    // { id: "measurementedit", label: "건강정보 수정", actionType: "component" },
+    { id: "measurementchart", label: "내 건강정보 차트", actionType: "component" },
   ];
 
   const componentMap = {
     "profile": Profile,
     "change-password": ChangePassword,
-  }
+    // 건강정보 조회 — 수정 버튼 클릭 시 수정 페이지로 이동
+    measurementlist: () => {
+      // 수정 모드일 때
+      if (editId) {
+        return (
+            <div>
+              <button
+                  onClick={() => {
+                    setEditId(null);
+                    setSelectedData(null);
+                  }}
+                  className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-sm transition"
+              >
+                ← 뒤로가기
+              </button>
+              <MeasurementEdit
+                  mode="mypage"
+                  id={editId}
+                  presetData={selectedData}
+                  onBack={() => {
+                    setEditId(null);
+                    setSelectedData(null);
+                  }}
+              />
+            </div>
+        );
+      }
+
+      // 리스트 모드일 때
+      return (
+          <MeasurementList
+              mode="mypage"
+              onEdit={(id, data) => {
+                console.log(" 수정 클릭됨 ID:", id, data);
+                setEditId(id);
+                setSelectedData(data);
+              }}
+          />
+      );
+    },
+    "measurementchart": MeasurementChart,
+  };
   const {
     activeId,
     ActiveComponent,
