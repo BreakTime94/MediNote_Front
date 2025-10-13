@@ -23,13 +23,14 @@ export default function GoogleLoginButton() {
       if (event.origin !== "http://localhost:8083") return;
 
       console.log("로그인 결과:", event.data);
-
-      if (event.data.status === "LOGIN_SUCCESS") {
+      const{status, provider, member} = event.data;
+      if (status === "LOGIN_SUCCESS") {
+        setMember({...member, provider})
         // 기존 회원 → 홈 화면으로
         navigate("/index");
-      } else if (event.data.status === "NEED_REGISTER") {
+      } else if (status === "NEED_REGISTER") {
         // 신규 회원 → 회원가입 컴포넌트로 (state로 데이터 전달)
-        navigate("/member/social/register", { state: event.data });
+        navigate("/member/social/register", { state: {provider, member}});
       } else {
         // 그 외 에러 관련
         // show.error({

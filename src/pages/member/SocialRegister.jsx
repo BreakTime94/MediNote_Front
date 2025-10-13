@@ -3,14 +3,20 @@ import {useLocation, useNavigate} from "react-router-dom";
 import api from "@/components/common/api/axiosInterceptor.js";
 import UseDuplicateCheck from "./UseDuplicateCheck.jsx";
 import TermsSection from "@/pages/member/terms/TermsSection.jsx";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 export default function SocialRegister() {
   const location = useLocation();
-  const socialData = location.state.dto; // SuccessHandler에서 받은 dto handler에서 브라우저에 Script 형태로 dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌
-  const [info, setInfo] = useState({ ...socialData, nickname:socialData.nickname?.trim().replace(/\s+/g, '') || '', extraEmail: "" });
+  const {provider, dto} = location.state; // SuccessHandler에서 받은 dto handler에서 브라우저에 Script 형태로 dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌
+  const [info, setInfo] = useState({
+    ...dto, nickname: dto.nickname?.trim().replace(/\s+/g, '') || '',
+            extraEmail: "" ,
+            agreements: []});
   const navigate = useNavigate();
   //에러 모음 상태값
   const [errors, setErrors] = useState({});
+
+  const {setMember} = useAuthStore();
 
   //일반 회원가입 register에서 썼던 focus가 한 번이라도 되었는가? 에 대한 상태값
   const[touched, setTouched] = useState({
@@ -85,6 +91,7 @@ export default function SocialRegister() {
       withCredentials : true
     }).then((resp) => {
       console.log("Content-type :", resp.headers[`content-type`])
+      setMember({...info, provider})
       navigate(`/`);
     }
     ).catch((error) => {
