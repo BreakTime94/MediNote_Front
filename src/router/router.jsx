@@ -6,6 +6,8 @@ import mapRouter from "@/router/map/mapRouter.jsx";
 import AdminRootLayout from "@/pages/admin/components/layouts/AdminRootLayout.jsx";
 import AdminIndex from "@/pages/admin/components/home/AdminIndex.jsx";
 import AdminProtectedRoute from "@/pages/admin/components/router/AdminProtectedRoute.jsx";
+import previewRouter from "@/router/health/SummarySectionPreviewRouter.jsx";
+import SummarySectionPreview from "@/pages/health/SummarySectionPreview.jsx";
 
 //Lazy 로드
 const Index = lazy(() => import("../pages/home/Index.jsx"))
@@ -17,7 +19,9 @@ const router = createBrowserRouter([
             //이곳에는 페이지 연결
             //인텍스 페이지
             {index: true, element: <Index />},
+            // {index: true, element: <SummarySectionPreview />},
             ...memberRouter,
+            ...previewRouter,
 
             // 지도 관련 라우터 ✅
             ...mapRouter,
