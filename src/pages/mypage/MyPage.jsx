@@ -13,6 +13,11 @@ export default function MyPage() {
   const [editId, setEditId] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
 
+  const handleMypage = () => {
+    setEditId(null);
+    setSelectedData(null);
+  }
+
   const navItems = useMemo(() => {
     const baseItems = [
       { id: "profile", label: "프로필 정보", actionType: "component"},
@@ -52,11 +57,8 @@ export default function MyPage() {
         return (
             <div>
               <button
-                  onClick={() => {
-                    setEditId(null);
-                    setSelectedData(null);
-                  }}
-                  className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-sm transition"
+                  onClick={handleMypage}
+                  className="mb-4 px-4 py-2 text-gray-700 transition"
               >
                 ← 뒤로가기
               </button>
@@ -64,6 +66,7 @@ export default function MyPage() {
                   mode="mypage"
                   id={editId}
                   presetData={selectedData}
+                  onMypage={handleMypage}
                   onBack={() => {
                     setEditId(null);
                     setSelectedData(null);
