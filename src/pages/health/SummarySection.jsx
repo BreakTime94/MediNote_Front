@@ -6,7 +6,7 @@ import {
 import { Activity, Moon, Droplet, Heart, TrendingUp, TrendingDown, Lightbulb, Target } from "lucide-react";
 
 /* 인덱스 페이지 건강 요약 섹션 - Premium Edition */
-export default function HealthSummarySection() {
+export default function SummarySection() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
