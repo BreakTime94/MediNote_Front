@@ -10,8 +10,8 @@ function SiteHeader() {
   const navigate = useNavigate();
   const{member, setMember} = useAuthStore();
     return (
-        <header className="w-full bg-white px-6 py-4">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <header className="w-full bg-white px-6 py-4 ">
+            <div className="max-w-7xl mx-auto flex items-center justify-between ">
                 {/* 좌측 로고 영역 */}
                 <div className="flex items-center hover:cursor-pointer" onClick={()=>{navigate("/")}}>
                     {/* 로고 플레이스홀더 */}

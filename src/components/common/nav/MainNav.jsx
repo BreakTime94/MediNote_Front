@@ -5,7 +5,7 @@ import NavBar from "./NavBar.jsx";
 
 function MainNav() {
     return (
-        <nav className="w-full border-b bg-white shadow-sm z-50 sticky top-0">
+        <nav className="w-full border-b border-gray-300 bg-white  z-50 sticky top-0">
             <div className="container mx-auto">
                 <NavBar
                     items={NavData}
