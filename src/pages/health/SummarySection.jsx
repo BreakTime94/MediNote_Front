@@ -98,7 +98,7 @@ export default function SummarySection() {
             건강 대시보드를 채우려면 첫 건강정보를 등록해야 해요!
           </p>
           <button
-            onClick={() => navigate('/health/measurement/register')}
+            onClick={() => navigate('/health/measurement')}
             className="bg-gradient-to-r from-pink-400 to-purple-500 text-white px-8 py-3 rounded-full text-lg font-semibold hover:opacity-90 transition shadow-lg"
           >
             건강정보 등록하러 가기 →

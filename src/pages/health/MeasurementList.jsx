@@ -77,7 +77,7 @@ function MeasurementList({ mode = "page", onEdit}) {
       <div className="text-center text-gray-500 mt-10">
         <p>등록된 건강정보가 없습니다</p>
         <button
-          onClick={() => navigate("/health/measurement/register")}
+          onClick={() => navigate("/health/measurement")}
           className="mt-4 bg-pink-400 text-white px-2 py-2 rounded hover:bg-pink-500 transition">
           새 건강정보 등록하기!(등록 후 조회 가능)
         </button>
