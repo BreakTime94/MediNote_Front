@@ -7,9 +7,9 @@ import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 export default function SocialRegister() {
   const location = useLocation();
-  const {provider, dto} = location.state; // SuccessHandler에서 받은 dto handler에서 브라우저에 Script 형태로 dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌
+  const {provider, member} = location.state; // SuccessHandler에서 받은 dto, handler에서 브라우저에 Script 형태로 status, provicer, dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌(그 중 status는 분기처리용으로만 사용)
   const [info, setInfo] = useState({
-    ...dto, nickname: dto.nickname?.trim().replace(/\s+/g, '') || '',
+    ...member, nickname: member.nickname?.trim().replace(/\s+/g, '') || '',
             extraEmail: "" ,
             agreements: []});
   const navigate = useNavigate();
@@ -86,6 +86,9 @@ export default function SocialRegister() {
 
   const submit = (e) => {
     if(!window.confirm("정말 제출하시겠습니까?")) return;
+    console.log("payload:", payload);
+    console.log("agreements:", payload.agreements);
+
     e.preventDefault();
     api.post("/social/auth/register", payload, {
       withCredentials : true
@@ -103,10 +106,14 @@ export default function SocialRegister() {
   return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className={"bg-white shadow-lg rounded-2xl p-8 w-96"}>
-          <span className={"mb-4 font-bold text-2xl"}>가입이 거의 완료되었어요!</span>
-          <div className="mb-4">가입하시는 이메일: {info.email}</div>
+          <div className={"mb-2 font-bold text-2xl"}>
+            <span>가입이 거의 완료되었어요!</span>
+          </div>
+          <div className="mb-2 text-sm">
+            <span>가입하시는 이메일: {info.email}</span>
+          </div>
           {/* 추가 입력 폼 */}
-          <div className="mb-4">
+          <div className="mb-2">
             <input type="text" name={"extraEmail"} placeholder="추가이메일" className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                    onBlur={handleBlur} onChange={socialChange} />
           </div>
@@ -119,7 +126,7 @@ export default function SocialRegister() {
 
           {/* 중복 검사 메시지 */}
           {touched.extraEmail && !errors.extraEmail && extraEmailStatus !== "idle" && info.email !== info.extraEmail && (
-              <ul className="mt-2 text-xs">
+              <ul className="my-2 text-xs">
                 <li className={extraEmailStatus === "available" ? "text-blue-500" : "text-red-500"}>
                   {extraEmailStatus === "available" ? "사용 가능한 이메일입니다." : "사용하실 수 없는 이메일입니다."}
                 </li>
@@ -150,7 +157,7 @@ export default function SocialRegister() {
           {/* 약관 동의 섹션 (제출 버튼 위) */}
           <TermsSection agreements={agreements} setAgreements={setAgreements} onTermsLoaded={setTermsList} />
 
-          <div className="flex gap-2">
+          <div className="flex mt-3 gap-2">
             <button
                 type="submit"
                 className={`flex-1  text-white py-2 rounded-lg
