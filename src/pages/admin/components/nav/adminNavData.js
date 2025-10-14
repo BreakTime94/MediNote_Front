@@ -17,7 +17,4 @@ export const AdminNavData = [
             { label: "건강정보 차트", path: "/mycare/vitals" },
         ],
     },
-
-
-
 ];
