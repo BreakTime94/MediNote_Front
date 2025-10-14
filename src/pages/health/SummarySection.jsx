@@ -15,17 +15,28 @@ export default function HealthSummarySection() {
 
   const fetchSummary = async () => {
     try {
-      //백엔드 호출
-      const res = await api.get("/health/measurement/summary" , { headers: { "Cache-Control": "no-cache" }, // 캐시 방지
+      // ✅ 백엔드 호출
+      const res = await api.get("/health/measurement/summary", {
+        headers: { "Cache-Control": "no-cache" },
       });
-    console.log("summary response: ", res.data);
-    setData(res.data);
-  }catch (err) {
-    console.error("요약 데이터 불러오기 실패:", err)
-    }finally {
+
+      console.log("✅ summary response:", res.data);
+
+      // ✅ 유효성 검사 추가
+      if (res.data && typeof res.data === "object") {
+        setData(res.data);
+      } else {
+        console.warn("⚠️ 서버 응답 형식이 예상과 다름:", res.data);
+        setData(null);
+      }
+
+    } catch (err) {
+      console.error(" 요약 데이터 불러오기 실패:", err.response?.data || err.message);
+      setData(null); // 에러 시에도 UI가 깨지지 않게 null 처리
+    } finally {
       setLoading(false);
     }
-  }
+  };
 
   if (loading)
     return (
@@ -50,10 +61,10 @@ export default function HealthSummarySection() {
         {/* 한 줄 4개 카드 - 간격 증가 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
           <BMICard
-              bmi={data.bmi}
-              status={data.bmiStatus}
-              height={data.height}
-              weight={data.weight}
+              bmi={data?.bmi}
+              status={data?.bmiStatus}
+              height={data?.height}
+              weight={data?.weight}
           />
           <BloodSugarChart
               bloodSugar={data.bloodSugar}
