@@ -1,43 +1,43 @@
 import React, { useEffect, useState } from "react";
+import api from "@/components/common/api/axiosInterceptor.js";
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceArea,
+  ResponsiveContainer, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea,
 } from "recharts";
-import { Activity, Moon, Droplet, Heart } from "lucide-react";
+import { Activity, Moon, Droplet, Heart, TrendingUp, TrendingDown, Lightbulb, Target } from "lucide-react";
 
-/**
- * 📊 인덱스 페이지 건강 요약 섹션 - Premium Edition
- */
+/* 인덱스 페이지 건강 요약 섹션 - Premium Edition */
 export default function HealthSummarySection() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 데모 데이터로 시뮬레이션
-    setTimeout(() => {
-      setData({
-        bmi: 23,
-        bmiStatus: "과체중",
-        height: 170,
-        weight: 66.5,
-        bloodSugar: 160,
-        bloodSugarStatus: "당뇨 의심",
-        sleepHours: 3,
-        sleepStatus: "수면 부족",
-        healthScore: 80,
-        summary: "BMI: 과체중 / 혈당: 당뇨 의심 / 수면: 수면 부족"
-      });
-      setLoading(false);
-    }, 500);
+    fetchSummary();
   }, []);
+
+  const fetchSummary = async () => {
+    try {
+      //  백엔드 호출
+      const res = await api.get("/health/measurement/summary", {
+        headers: { "Cache-Control": "no-cache" },
+      });
+
+      console.log(" summary response:", res.data);
+
+      //  유효성 검사 추가
+      if (res.data && typeof res.data === "object") {
+        setData(res.data);
+      } else {
+        console.warn("⚠️ 서버 응답 형식이 예상과 다름:", res.data);
+        setData(null);
+      }
+
+    } catch (err) {
+      console.error(" 요약 데이터 불러오기 실패:", err.response?.data || err.message);
+      setData(null); // 에러 시에도 UI가 깨지지 않게 null 처리
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading)
     return (
@@ -55,17 +55,17 @@ export default function HealthSummarySection() {
 
   return (
       <section className="max-w-7xl mx-auto py-12 px-4 space-y-8">
-        <h2 className="text-3xl font-bold text-gray-400 text-center mb-8 tracking-tight">
+        <h2 className="text-3xl font-bold text-gray-600 text-center mb-8 tracking-tight">
           Health Dashboard
         </h2>
 
         {/* 한 줄 4개 카드 - 간격 증가 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
           <BMICard
-              bmi={data.bmi}
-              status={data.bmiStatus}
-              height={data.height}
-              weight={data.weight}
+              bmi={data?.bmi}
+              status={data?.bmiStatus}
+              height={data?.height}
+              weight={data?.weight}
           />
           <BloodSugarChart
               bloodSugar={data.bloodSugar}
@@ -75,6 +75,76 @@ export default function HealthSummarySection() {
           <HealthScoreChart score={data.healthScore || 80} />
         </div>
 
+        {/*  주간 트렌드 요약 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <TrendCard
+              label="체중"
+              value={`${data.weight || '-'}kg`}
+              change={data.weightChange != null
+                  ? `${data.weightChange > 0 ? '+' : ''}${data.weightChange}kg`
+                  : "비교 데이터 없음"
+              }
+              trend={data.weightTrend || "stable"}
+              emoji="⚖️"
+          />
+          <TrendCard
+              label="혈당"
+              value={`${data.bloodSugar || '-'} mg/dL`}
+              change={data.bloodSugarChange != null
+                  ? `${data.bloodSugarChange > 0 ? '+' : ''}${data.bloodSugarChange}`
+                  : "비교 데이터 없음"
+              }
+              trend={data.bloodSugarTrend || "stable"}
+              emoji="🩸"
+          />
+          <TrendCard
+              label="수면"
+              value={`${data.sleepHours || '-'}시간`}
+              change={data.sleepHoursChange != null
+                  ? `${data.sleepHoursChange > 0 ? '+' : ''}${data.sleepHoursChange}시간`
+                  : "비교 데이터 없음"
+              }
+              trend={data.sleepTrend || "stable"}
+              emoji="😴"
+          />
+        </div>
+
+        {/* 건강 팁 & 목표 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          {/* AI 건강 팁 */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-xl border border-purple-100">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-6 h-6 text-purple-500 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-bold text-gray-800 mb-2">💡 오늘의 건강 팁</h3>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {getHealthTip(data)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 목표 달성률 */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-5 rounded-xl border border-blue-100">
+            <div className="flex items-start gap-3">
+              <Target className="w-6 h-6 text-blue-500 mt-1 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-800 mb-2">🎯 이번 주 목표</h3>
+                <p className="text-sm text-gray-700 mb-2">
+                  목표 체중 65kg 달성까지 <span className="font-bold text-blue-600">0.3kg</span> 남음!
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                      className="bg-gradient-to-r from-blue-400 to-cyan-500 h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: '95%' }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 text-right">95% 달성</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-8 p-6 bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] rounded-2xl text-center shadow-sm border border-gray-100">
           <p className="text-base text-gray-700 font-medium leading-relaxed">
             {data.summary ?? "전반적으로 건강 상태가 안정적입니다 ✨"}
@@ -82,6 +152,66 @@ export default function HealthSummarySection() {
         </div>
       </section>
   );
+}
+
+/* ---------------------------------------------
+   주간 트렌드 카드
+--------------------------------------------- */
+function TrendCard({ label, value, change, trend, emoji }) {
+  const trendConfig = {
+    up: { icon: TrendingUp, color: "text-red-500", bg: "bg-red-50" },
+    down: { icon: TrendingDown, color: "text-green-500", bg: "bg-green-50" },
+    stable: { icon: null, color: "text-gray-500", bg: "bg-gray-50" }
+  };
+
+  const config = trendConfig[trend];
+  const TrendIcon = config.icon;
+
+  return (
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-2xl">{emoji}</span>
+          {TrendIcon && <TrendIcon className={`w-5 h-5 ${config.color}`} />}
+        </div>
+        <h3 className="text-sm text-gray-600 font-medium mb-1">{label}</h3>
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-bold text-gray-800">{value}</span>
+          <span className={`text-sm font-semibold ${config.color}`}>
+          {change}
+        </span>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">vs 지난주</p>
+      </div>
+  );
+}
+
+/* ---------------------------------------------
+   AI 건강 팁 생성
+--------------------------------------------- */
+function getHealthTip(data) {
+  const tips = [];
+
+  // 혈당 체크
+  if (data.bloodSugar > 110) {
+    tips.push("혈당이 약간 높아요. 식후 10분 산책을 추천드려요! 🚶‍♂️");
+  }
+
+  // BMI 체크
+  if (data.bmiStatus === "비만") {
+    tips.push("규칙적인 운동과 균형잡힌 식단으로 건강한 체중을 유지해보세요 💪");
+  }
+
+  // 수면 체크
+  if (data.sleepHours < 7) {
+    tips.push("수면 시간이 부족해요. 충분한 휴식이 건강의 기본이에요 😴");
+  }
+
+  // 좋은 상태
+  if (tips.length === 0) {
+    return "모든 지표가 안정적이에요! 이 상태를 계속 유지하세요 ✨";
+  }
+
+  return tips[0]; // 첫 번째 팁 반환
 }
 
 /* ---------------------------------------------
