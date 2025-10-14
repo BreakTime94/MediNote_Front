@@ -1,21 +1,44 @@
 import React, {useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
-import api from "../axiosInterceptor.js";
-import UseDuplicateCheck from "../UseDuplicateCheck.jsx";
+import api from "@/components/common/api/axiosInterceptor.js";
+import UseDuplicateCheck from "./UseDuplicateCheck.jsx";
+import TermsSection from "@/pages/member/terms/TermsSection.jsx";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 export default function SocialRegister() {
   const location = useLocation();
-  const socialData = location.state.dto; // SuccessHandler에서 받은 dto handler에서 브라우저에 Script 형태로 dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌
-  const [info, setInfo] = useState({ ...socialData, nickname:socialData.nickname?.trim().replace(/\s+/g, '') || '', extraEmail: "" });
+  const {provider, dto} = location.state; // SuccessHandler에서 받은 dto handler에서 브라우저에 Script 형태로 dto 값을 JSON 형태로 담아서 실행하게 코드를 보내줌
+  const [info, setInfo] = useState({
+    ...dto, nickname: dto.nickname?.trim().replace(/\s+/g, '') || '',
+            extraEmail: "" ,
+            agreements: []});
   const navigate = useNavigate();
   //에러 모음 상태값
   const [errors, setErrors] = useState({});
+
+  const {setMember} = useAuthStore();
 
   //일반 회원가입 register에서 썼던 focus가 한 번이라도 되었는가? 에 대한 상태값
   const[touched, setTouched] = useState({
     extraEmail: false,
     nickname: false,
   })
+
+  const [agreements, setAgreements] = useState({
+    service: false,
+    privacy: false,
+    marketing: false,
+  });
+
+  const [termsList, setTermsList] = useState([]);
+
+  const payload = {
+    ...info,
+    agreements: termsList.map(term => ({
+      termsId: term.id,
+      agreed: agreements[term.policyCode] || false
+    }))
+  };
 
   //최초 입력란에 마우스가 클릭 된 순간 작동하는 함수
   const handleBlur = (e) => {
@@ -58,15 +81,17 @@ export default function SocialRegister() {
   const nicknameStatus = UseDuplicateCheck("nickname", info.nickname, "/member/check/nickname", validation);
 
   // 유효성 검사, 중복체크에 통과하면, 버튼 활성화
-  const isDisabled = Object.values(errors).some((e)=> e && e.length > 0) || extraEmailStatus !== "available" || nicknameStatus !== "available";
+  const isDisabled = Object.values(errors).some((e)=> e && e.length > 0) || extraEmailStatus !== "available" || nicknameStatus !== "available"
+      || agreements.privacy === false || agreements.service === false;
 
   const submit = (e) => {
     if(!window.confirm("정말 제출하시겠습니까?")) return;
     e.preventDefault();
-    api.post("/social/auth/register", info, {
+    api.post("/social/auth/register", payload, {
       withCredentials : true
     }).then((resp) => {
       console.log("Content-type :", resp.headers[`content-type`])
+      setMember({...info, provider})
       navigate(`/`);
     }
     ).catch((error) => {
@@ -78,6 +103,7 @@ export default function SocialRegister() {
   return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className={"bg-white shadow-lg rounded-2xl p-8 w-96"}>
+          <span className={"mb-4 font-bold text-2xl"}>가입이 거의 완료되었어요!</span>
           <div className="mb-4">가입하시는 이메일: {info.email}</div>
           {/* 추가 입력 폼 */}
           <div className="mb-4">
@@ -121,6 +147,9 @@ export default function SocialRegister() {
                 </li>
               </ul>
           )}
+          {/* 약관 동의 섹션 (제출 버튼 위) */}
+          <TermsSection agreements={agreements} setAgreements={setAgreements} onTermsLoaded={setTermsList} />
+
           <div className="flex gap-2">
             <button
                 type="submit"

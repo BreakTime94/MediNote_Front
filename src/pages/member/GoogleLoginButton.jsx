@@ -2,9 +2,11 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import googleLogo from "@/pages/member/icon/web_light_rd_na.svg";
 import {show} from "@/test/stories/components/common/ui/toast/commonToast.jsx";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 export default function GoogleLoginButton() {
   const navigate = useNavigate();
+  const {setMember} = useAuthStore();
 
   const handleLogin = () => {
     // 팝업 열기
@@ -21,19 +23,21 @@ export default function GoogleLoginButton() {
       if (event.origin !== "http://localhost:8083") return;
 
       console.log("로그인 결과:", event.data);
-
-      if (event.data.status === "LOGIN_SUCCESS") {
+      const{status, provider, member} = event.data;
+      if (status === "LOGIN_SUCCESS") {
+        setMember({...member, provider})
         // 기존 회원 → 홈 화면으로
         navigate("/index");
-      } else if (event.data.status === "NEED_REGISTER") {
+      } else if (status === "NEED_REGISTER") {
         // 신규 회원 → 회원가입 컴포넌트로 (state로 데이터 전달)
-        navigate("/social/register", { state: event.data });
+        navigate("/member/social/register", { state: {provider, member}});
       } else {
         // 그 외 에러 관련
-        show.error({
-          title: event.data.status,
-          desc: event.data.message
-        })
+        // show.error({
+        //   title: event.response.data.status,
+        //   desc: event.response.data.message
+        // })
+        window.alert("알 수 없는 오류입니다. 다시 시도하여 주세요.")
         navigate("/member/login")
       }
     };

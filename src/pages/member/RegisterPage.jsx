@@ -4,6 +4,7 @@ import api from "../../components/common/api/axiosInterceptor.js";
 
 import duplicateCheck from "./UseDuplicateCheck.jsx";
 import RegisterEmailField from "./RegisterEmailField.jsx";
+import TermsSection from "@/pages/member/terms/TermsSection.jsx";
 
 function RegisterPage(props) {
   // Router의 이동수단
@@ -29,6 +30,14 @@ function RegisterPage(props) {
     extraEmail: false,
     nickname: false,
   })
+
+  const [agreements, setAgreements] = useState({
+    service: false,
+    privacy: false,
+    marketing: false,
+  });
+
+  const [termsList, setTermsList] = useState([]);
 
   //최초 입력란에 마우스가 클릭 된 순간 작동하는 함수
   const handleBlur = (e) => {
@@ -121,13 +130,21 @@ function RegisterPage(props) {
 
   // 유효성 검사, 중복체크에 통과하면, 버튼 활성화
   const isDisabled = !passwordMatch || Object.values(passwordRules).some(r => !r) || Object.values(errors).some((e)=> e && e.length > 0) ||
-      emailStatus !== "available" || extraEmailStatus !== "available" || nicknameStatus !== "available" || !verification;
+      emailStatus !== "available" || extraEmailStatus !== "available" || nicknameStatus !== "available" || !verification || agreements.privacy === false || agreements.service === false;
+
+  const payload = {
+    ...member,
+    agreements: termsList.map(term => ({
+      termsId: term.id,
+      agreed: agreements[term.policyCode] || false
+    }))
+  };
 
   //작성내용 제출
   const submit = (e) => {
+    if(!window.confirm("정말 제출하시겠습니까?")) return;
     e.preventDefault()
-
-    api.post(`/member/register`, member)
+    api.post(`/member/register`, payload)
         .then((res) => {
           console.log("Content-Type", res.headers[`content-type`])
           navigate("/member/login")
@@ -261,8 +278,11 @@ function RegisterPage(props) {
                   </ul>
               )}
             </div>
+            {/* 약관 동의 섹션 (제출 버튼 위) */}
+            <TermsSection agreements={agreements} setAgreements={setAgreements} onTermsLoaded={setTermsList} />
+
             {/* 버튼 영역 */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-2">
               <button
                   type="submit"
                   className={`flex-1  text-white py-2 rounded-lg
