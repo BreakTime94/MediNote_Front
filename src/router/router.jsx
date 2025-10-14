@@ -2,6 +2,7 @@ import React, {lazy} from "react";
 import { createBrowserRouter} from "react-router-dom";
 import RootLayout from '../layouts/RootLayout.jsx'
 import memberRouter from "@/router/member/memberRouter.jsx";
+import mapRouter from "@/router/map/mapRouter.jsx";
 import AdminRootLayout from "@/pages/admin/components/layouts/AdminRootLayout.jsx";
 import AdminIndex from "@/pages/admin/components/home/AdminIndex.jsx";
 import AdminProtectedRoute from "@/pages/admin/components/router/AdminProtectedRoute.jsx";
@@ -17,6 +18,9 @@ const router = createBrowserRouter([
             //인텍스 페이지
             {index: true, element: <Index />},
             ...memberRouter,
+
+            // 지도 관련 라우터 ✅
+            ...mapRouter,
             // 보호 구간: 가드로 감싸서 하위 라우트 보호, 인증 필요한 페이지
             {
 
