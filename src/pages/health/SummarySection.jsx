@@ -4,11 +4,13 @@ import {
   ResponsiveContainer, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea,
 } from "recharts";
 import { Activity, Moon, Droplet, Heart, TrendingUp, TrendingDown, Lightbulb, Target } from "lucide-react";
+import {useAuthStore} from "../../components/common/hooks/useAuthStore.jsx";
 
 /* 인덱스 페이지 건강 요약 섹션 - Premium Edition */
 export default function SummarySection() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const {member} = useAuthStore();
 
   useEffect(() => {
     fetchSummary();
@@ -18,7 +20,7 @@ export default function SummarySection() {
     try {
       //  백엔드 호출
       const res = await api.get("/health/measurement/summary", {
-        headers: { "Cache-Control": "no-cache" },
+        headers: { "Cache-Control": "no-cache" ,  "X-Member-Id": member?.id},
       });
 
       console.log(" summary response:", res.data);
@@ -27,7 +29,7 @@ export default function SummarySection() {
       if (res.data && typeof res.data === "object") {
         setData(res.data);
       } else {
-        console.warn("⚠️ 서버 응답 형식이 예상과 다름:", res.data);
+        console.warn(" 서버 응답 형식이 예상과 다름:", res.data);
         setData(null);
       }
 
