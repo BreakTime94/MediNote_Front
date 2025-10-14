@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {useEmailVerification} from "./useEmailVerification.jsx";
 import {show} from "../common/ui/toast/commonToast.jsx";
-import axios from "axios";
+
 import api from "./axiosInterceptor.js";
 import {useNavigate} from "react-router-dom";
 

@@ -10,7 +10,7 @@ function TestMeasurementEdit() {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 데이터 불러오기
+  //  데이터 불러오기
   useEffect(() => {
     fetchMeasurement();
   }, [id]);
@@ -27,13 +27,13 @@ function TestMeasurementEdit() {
     }
   };
 
-  // ✅ 공통 입력 핸들러
+  // 공통 입력 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 새 이력 저장
+  // 새 이력 저장
   const handleSaveNewVersion = async () => {
     if (!window.confirm("수정하시겠습니까?\n새 이력으로 저장됩니다.")) return;
 
@@ -55,7 +55,7 @@ function TestMeasurementEdit() {
     };
 
     try {
-      await api.post(`/health/measurement/update`, payload);
+      await api.put(`/health/measurement/update`, payload);
       alert("새로운 건강정보가 추가되었습니다.");
       navigate("/health/measurement/list");
     } catch (err) {
@@ -64,12 +64,12 @@ function TestMeasurementEdit() {
     }
   };
 
-  // ✅ 비활성화 (삭제)
+  // 비활성화 (삭제)
   const handleDeactivate = async () => {
     if (!window.confirm("이 건강정보를 삭제하시겠습니까?")) return;
 
     try {
-      await api.patch(`/health/measurement/${id}/deactivate`);
+      await api.delete(`/health/measurement/${id}`);
       alert("해당 건강정보가 삭제(비활성화)되었습니다.");
       navigate("/health/measurement/list");
     } catch (err) {
