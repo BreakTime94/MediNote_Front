@@ -1,43 +1,31 @@
 import React, { useEffect, useState } from "react";
+import api from "@/components/common/api/axiosInterceptor.js";
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceArea,
-} from "recharts";
+  ResponsiveContainer, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea,} from "recharts";
 import { Activity, Moon, Droplet, Heart } from "lucide-react";
 
-/**
- * 📊 인덱스 페이지 건강 요약 섹션 - Premium Edition
- */
+/* 인덱스 페이지 건강 요약 섹션 - Premium Edition */
 export default function HealthSummarySection() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 데모 데이터로 시뮬레이션
-    setTimeout(() => {
-      setData({
-        bmi: 23,
-        bmiStatus: "과체중",
-        height: 170,
-        weight: 66.5,
-        bloodSugar: 160,
-        bloodSugarStatus: "당뇨 의심",
-        sleepHours: 3,
-        sleepStatus: "수면 부족",
-        healthScore: 80,
-        summary: "BMI: 과체중 / 혈당: 당뇨 의심 / 수면: 수면 부족"
-      });
-      setLoading(false);
-    }, 500);
+    fetchSummary();
   }, []);
+
+  const fetchSummary = async () => {
+    try {
+      //백엔드 호출
+      const res = await api.get("/health/measurement/summary" , { headers: { "Cache-Control": "no-cache" }, // 캐시 방지
+      });
+    console.log("summary response: ", res.data);
+    setData(res.data);
+  }catch (err) {
+    console.error("요약 데이터 불러오기 실패:", err)
+    }finally {
+      setLoading(false);
+    }
+  }
 
   if (loading)
     return (
