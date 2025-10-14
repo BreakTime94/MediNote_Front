@@ -15,9 +15,20 @@ export default defineConfig({
     server: {
         allowedHosts: ['mylocal.com', 'api.mylocal.com']  // 모든 호스트 허용 (개발 환경에서만 권장)
     },
+
   resolve: { // 루트경로 @로 설정
     alias: {
       '@': path.resolve(dirname, './src'),
+    },
+  },
+
+  //recharts
+  optimizeDeps: {
+    include: ['recharts'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/, /recharts/],
     },
   },
 

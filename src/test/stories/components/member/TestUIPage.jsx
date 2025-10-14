@@ -101,11 +101,13 @@ function testUIPage(props) {
             <div className={"flex justify-center items-center"}>
               <div className={"flex-1 flex justify-center items-center"}>
                 <span className={"text-xs cursor-pointer hover:underline"} onClick={() => {
-                  navigate("/member/findEmail")
+                  navigate("/member/findEmail");
                 }}>아이디 찾기</span>
               </div>
               <div className={"flex-1 flex justify-center items-center"}>
-                <span className={"text-xs cursor-pointer hover:underline"}>비밀번호 찾기</span>
+                <span className={"text-xs cursor-pointer hover:underline"} onClick={() => {
+                  navigate("/member/resetPassword");
+                }}>비밀번호 찾기</span>
               </div>
             </div>
           </div>
