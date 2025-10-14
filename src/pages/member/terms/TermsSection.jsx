@@ -36,7 +36,7 @@ export default function TermsSection({ agreements, setAgreements, onTermsLoaded 
   };
 
   return (
-      <div className="mt-6 border-t pt-4">
+      <div className="mt-6 border-t pt-2">
         <h3 className="font-semibold text-gray-800 mb-2">약관 동의</h3>
 
         <div className="space-y-2">
