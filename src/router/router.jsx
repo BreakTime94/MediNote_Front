@@ -5,6 +5,8 @@ import memberRouter from "@/router/member/memberRouter.jsx";
 import AdminRootLayout from "@/pages/admin/components/layouts/AdminRootLayout.jsx";
 import AdminIndex from "@/pages/admin/components/home/AdminIndex.jsx";
 import AdminProtectedRoute from "@/pages/admin/components/router/AdminProtectedRoute.jsx";
+import previewRouter from "@/router/health/SummarySectionPreviewRouter.jsx";
+import SummarySectionPreview from "@/pages/health/SummarySectionPreview.jsx";
 
 //Lazy 로드
 const Index = lazy(() => import("../pages/home/Index.jsx"))
@@ -16,7 +18,9 @@ const router = createBrowserRouter([
             //이곳에는 페이지 연결
             //인텍스 페이지
             {index: true, element: <Index />},
+            // {index: true, element: <SummarySectionPreview />},
             ...memberRouter,
+            ...previewRouter,
             // 보호 구간: 가드로 감싸서 하위 라우트 보호, 인증 필요한 페이지
             {
 

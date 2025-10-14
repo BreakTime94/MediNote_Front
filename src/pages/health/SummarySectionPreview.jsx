@@ -62,7 +62,7 @@ export default function SummarySectionPreview(props) {
                 로그인해주세요 ✨
               </p>
               <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/member/login')}
                   className="w-full px-8 py-4 rounded-xl text-white text-lg font-bold bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 transform hover:scale-105 transition-all duration-200 shadow-lg"
               >
                 로그인하러 가기
@@ -70,7 +70,7 @@ export default function SummarySectionPreview(props) {
               <p className="text-sm text-gray-500 mt-4">
                 계정이 없으신가요?{" "}
                 <button
-                    onClick={() => navigate('/signup')}
+                    onClick={() => navigate('/member/register')}
                     className="text-purple-500 font-semibold hover:underline"
                 >
                   회원가입
