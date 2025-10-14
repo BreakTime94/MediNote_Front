@@ -25,7 +25,7 @@ export default function QnARegister() {
             };
 
             const res = await api.post(
-                "http://localhost:8082/api/boards",
+                "/boards/register",
                 body,
                 { headers: { "Content-Type": "application/json" } }
             );
