@@ -56,7 +56,7 @@ export default function MyPage() {
                     setEditId(null);
                     setSelectedData(null);
                   }}
-                  className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-sm transition"
+                  className="mb-4 px-4 py-2 text-gray-700 transition"
               >
                 ← 뒤로가기
               </button>
