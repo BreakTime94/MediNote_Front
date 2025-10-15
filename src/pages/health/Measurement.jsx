@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/components/common/api/axiosInterceptor.js";
+import {MeasurementValidation} from "./MeasurementValidation.jsx";
 
 const initialHealthForm = {
   gender: "",
@@ -129,6 +130,13 @@ function Measurement() {
   //  저장
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    //유효성 검사
+    const errors = MeasurementValidation(form);
+    if (Object.keys(errors).length > 0) {
+      alert(Object.values(errors)[0]); // 첫 번째 오류만 표시
+      return;
+    }
 
     if (!window.confirm("건강정보를 등록하시겠습니까?")) return;
 
@@ -395,7 +403,7 @@ function Measurement() {
             )}
           </div>
 
-          {/* 🔸 복용약 */}
+          {/* 복용약 */}
           <div>
             <label className="font-semibold">복용약 여부</label>
             <select

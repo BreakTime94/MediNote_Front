@@ -2,11 +2,13 @@ import React, { useEffect, useState, } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/components/common/api/axiosInterceptor.js";
 import dayjs from "dayjs";
+import {MeasurementValidation} from "./MeasurementValidation.jsx";
 
 function MeasurementEdit({ id, onMypage }) {
   const navigate = useNavigate();
   const params = useParams();
   const [memberId, setMemberId] = useState(id);
+  const [errors, setErrors] = useState({}); // 기본정보 필드별로 유효성 검사 시 필요
 
   useEffect(() => {
     if (memberId === null || memberId === undefined) {
@@ -17,7 +19,7 @@ function MeasurementEdit({ id, onMypage }) {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  //  검색 관련 상태
+  // 검색 관련 상태
   const [chronicOptions, setChronicOptions] = useState([]);
   const [allergyOptions, setAllergyOptions] = useState([]);
   const [chronicSearch, setChronicSearch] = useState("");
@@ -25,7 +27,7 @@ function MeasurementEdit({ id, onMypage }) {
   const [medicationSearch, setMedicationSearch] = useState("");
   const [medicationResults, setMedicationResults] = useState([]);
 
-  //  등록폼과 동일하게 전체 리스트 1회 로딩
+  // 등록폼과 동일하게 전체 리스트 1회 로딩
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,7 +44,7 @@ function MeasurementEdit({ id, onMypage }) {
     fetchData();
   }, []);
 
-  //  데이터 불러오기
+  // 멤버 데이터 불러오기
   useEffect(() => {
     if (!memberId) return;
     fetchMeasurement();
@@ -50,13 +52,12 @@ function MeasurementEdit({ id, onMypage }) {
 
   const fetchMeasurement = async () => {
     try {
-      //  새로운 API 사용
       const res = await api.get(`/health/measurement/latest`);
 
       const medications = (res.data.medicationIds || []).map((id, index) => ({
         id: id,
-        nameKo: res.data.medicationNames?.[index] || '약품명 없음',
-        company: '',
+        nameKo: res.data.medicationNames?.[index] || "약품명 없음",
+        company: "",
       }));
 
       setForm({
@@ -73,13 +74,18 @@ function MeasurementEdit({ id, onMypage }) {
     }
   };
 
-  //  공통 입력
+  // 공통 입력
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const updatedForm = { ...form, [name]: value };
+    setForm(updatedForm);
+
+    // ✅ 실시간 유효성 검사
+    const newErrors = MeasurementValidation(updatedForm);
+    setErrors(newErrors);
   };
 
-  //  복용약 검색
+  // 복용약 검색
   const handleSearchMedication = async (keyword) => {
     if (!keyword.trim()) {
       setMedicationResults([]);
@@ -93,29 +99,19 @@ function MeasurementEdit({ id, onMypage }) {
     }
   };
 
-  //  복용약 선택 → 다중 선택 가능하도록 검색어/결과 유지
+  // 복용약 선택 → 다중 선택 가능하도록 검색어/결과 유지
   const handleSelectMedication = (med) => {
-    console.log("🔍 선택한 약:", med);
-    console.log("🔍 현재 medications:", form.medications);
-
     if (!form.medications) form.medications = [];
 
-    //  id로 중복 체크
-    if (form.medications.some((m) => m.id === med.id)) {
-      console.log("❌ 중복이라 추가 안 함");
-      return;
-    }
+    if (form.medications.some((m) => m.id === med.id)) return;
 
-    //  그대로 med 객체 추가
     setForm((prev) => ({
       ...prev,
       medications: [...prev.medications, med],
     }));
-
-    console.log(" 약 추가됨!", med);
   };
 
-  //  복용약 삭제
+  // 복용약 삭제
   const handleRemoveMedication = (id) => {
     setForm((prev) => ({
       ...prev,
@@ -123,10 +119,9 @@ function MeasurementEdit({ id, onMypage }) {
     }));
   };
 
-  //  기저질환 선택
+  // 기저질환 선택
   const handleSelectChronic = (opt) => {
     if (form.chronicDiseaseIds?.includes(opt.id)) return;
-
     setForm((prev) => ({
       ...prev,
       chronicDiseaseIds: [...(prev.chronicDiseaseIds || []), opt.id],
@@ -134,10 +129,9 @@ function MeasurementEdit({ id, onMypage }) {
     setChronicSearch("");
   };
 
-  //  알러지 선택
+  // 알러지 선택
   const handleSelectAllergy = (opt) => {
     if (form.allergyIds?.includes(opt.id)) return;
-
     setForm((prev) => ({
       ...prev,
       allergyIds: [...(prev.allergyIds || []), opt.id],
@@ -145,8 +139,15 @@ function MeasurementEdit({ id, onMypage }) {
     setAllergySearch("");
   };
 
-  //  저장
+  // 저장
   const handleSaveNewVersion = async () => {
+    const validationErrors = MeasurementValidation(form);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      alert(Object.values(validationErrors)[0]);
+      return;
+    }
+
     if (!window.confirm("수정하시겠습니까?\n새 이력으로 저장됩니다.")) return;
 
     const payload = {
@@ -155,11 +156,14 @@ function MeasurementEdit({ id, onMypage }) {
       drinking: form.drinking,
       drinkingPerWeek: form.drinkingPerWeek,
       drinkingPerOnce: form.drinkingPerOnce,
-      chronicDiseaseYn: form.chronicDiseaseYn === true || form.chronicDiseaseYn === "true",
+      chronicDiseaseYn:
+        form.chronicDiseaseYn === true || form.chronicDiseaseYn === "true",
       chronicDiseaseIds: form.chronicDiseaseIds || [],
-      allergyYn: form.allergyYn === true || form.allergyYn === "true",
+      allergyYn:
+        form.allergyYn === true || form.allergyYn === "true",
       allergyIds: form.allergyIds || [],
-      medicationYn: form.medicationYn === true || form.medicationYn === "true",
+      medicationYn:
+        form.medicationYn === true || form.medicationYn === "true",
       medicationIds: form.medications?.map((m) => m.id) || [],
       height: form.height,
       weight: form.weight,
@@ -168,9 +172,6 @@ function MeasurementEdit({ id, onMypage }) {
       bloodSugar: form.bloodSugar,
       sleepHours: form.sleepHours,
     };
-
-    console.log(" medications:", form.medications);
-    console.log(" medicationIds:", payload.medicationIds);
 
     try {
       await api.put(`/health/measurement/update`, payload);
@@ -183,7 +184,9 @@ function MeasurementEdit({ id, onMypage }) {
   };
 
   if (loading || !form)
-    return <p className="text-center mt-10 text-gray-500">데이터 불러오는 중...</p>;
+    return (
+      <p className="text-center mt-10 text-gray-500">데이터 불러오는 중...</p>
+    );
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-md">
@@ -269,7 +272,10 @@ function MeasurementEdit({ id, onMypage }) {
             name="chronicDiseaseYn"
             value={String(form.chronicDiseaseYn)}
             onChange={(e) =>
-              setForm({ ...form, chronicDiseaseYn: e.target.value === "true" })
+              setForm({
+                ...form,
+                chronicDiseaseYn: e.target.value === "true",
+              })
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
@@ -314,9 +320,8 @@ function MeasurementEdit({ id, onMypage }) {
                         onClick={() =>
                           setForm((prev) => ({
                             ...prev,
-                            chronicDiseaseIds: prev.chronicDiseaseIds.filter(
-                              (x) => x !== id
-                            ),
+                            chronicDiseaseIds:
+                              prev.chronicDiseaseIds.filter((x) => x !== id),
                           }))
                         }
                         className="text-red-500"
@@ -331,7 +336,7 @@ function MeasurementEdit({ id, onMypage }) {
           )}
         </div>
 
-        {/*  알러지 */}
+        {/* 알러지 */}
         <div>
           <label className="font-semibold">알러지 여부</label>
           <select
@@ -400,14 +405,17 @@ function MeasurementEdit({ id, onMypage }) {
           )}
         </div>
 
-        {/*  복용약 */}
+        {/* 복용약 */}
         <div>
           <label className="font-semibold">복용약 여부</label>
           <select
             name="medicationYn"
             value={String(form.medicationYn)}
             onChange={(e) =>
-              setForm({ ...form, medicationYn: e.target.value === "true" })
+              setForm({
+                ...form,
+                medicationYn: e.target.value === "true",
+              })
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
@@ -428,22 +436,22 @@ function MeasurementEdit({ id, onMypage }) {
                 className="border rounded-lg px-3 py-2 w-full"
               />
 
-              {/* 검색어가 있고 결과가 있을 때만 표시 */}
-              {medicationSearch.length > 0 && medicationResults.length > 0 && (
-                <ul className="mt-2 border rounded-lg p-2 bg-gray-50 max-h-40 overflow-y-auto">
-                  {medicationResults.map((med) => (
-                    <li
-                      key={med.medicationId}
-                      className="cursor-pointer hover:text-pink-600 py-1"
-                      onClick={() => handleSelectMedication(med)}
-                    >
-                      + {med.nameKo} {med.company && `(${med.company})`}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {medicationSearch.length > 0 &&
+                medicationResults.length > 0 && (
+                  <ul className="mt-2 border rounded-lg p-2 bg-gray-50 max-h-40 overflow-y-auto">
+                    {medicationResults.map((med) => (
+                      <li
+                        key={med.medicationId}
+                        className="cursor-pointer hover:text-pink-600 py-1"
+                        onClick={() => handleSelectMedication(med)}
+                      >
+                        + {med.nameKo}{" "}
+                        {med.company && `(${med.company})`}
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-              {/* 선택된 복용약 표시 */}
               <div className="mt-3 flex flex-wrap gap-2">
                 {form.medications?.map((m) => (
                   <span
@@ -467,77 +475,131 @@ function MeasurementEdit({ id, onMypage }) {
         {/* 신체정보 */}
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">키 (cm)</label>
+            <label className="block text-gray-700 font-semibold mb-2">
+              키 (cm)
+            </label>
             <input
               type="number"
               name="height"
               value={form.height || ""}
               onChange={handleChange}
               placeholder="169"
-              className="border rounded-lg px-3 py-2 w-full"
+              className={`border rounded-lg px-3 py-2 w-full ${
+                errors.height ? "border-red-400" : ""
+              }`}
             />
+            {errors.height && (
+              <p className="text-red-500 text-sm mt-1">{errors.height}</p>
+            )}
           </div>
+
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">체중 (kg)</label>
+            <label className="block text-gray-700 font-semibold mb-2">
+              체중 (kg)
+            </label>
             <input
               type="number"
               name="weight"
               value={form.weight || ""}
               onChange={handleChange}
               placeholder="73"
-              className="border rounded-lg px-3 py-2 w-full"
+              className={`border rounded-lg px-3 py-2 w-full ${
+                errors.weight ? "border-red-400" : ""
+              }`}
             />
+            {errors.weight && (
+              <p className="text-red-500 text-sm mt-1">{errors.weight}</p>
+            )}
           </div>
         </div>
 
         {/* 혈압/혈당 */}
         <div className="grid grid-cols-3 gap-6">
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">수축기 혈압</label>
+            <label className="block text-gray-700 font-semibold mb-2">
+              수축기 혈압
+            </label>
             <input
               type="number"
               name="bloodPressureSystolic"
               value={form.bloodPressureSystolic || ""}
               onChange={handleChange}
               placeholder="118"
-              className="border rounded-lg px-3 py-2 w-full"
+              className={`border rounded-lg px-3 py-2 w-full ${
+                errors.bloodPressureSystolic ? "border-red-400" : ""
+              }`}
             />
+            {errors.bloodPressureSystolic && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.bloodPressureSystolic}
+              </p>
+            )}
           </div>
+
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">이완기 혈압</label>
+            <label className="block text-gray-700 font-semibold mb-2">
+              이완기 혈압
+            </label>
             <input
               type="number"
               name="bloodPressureDiastolic"
               value={form.bloodPressureDiastolic || ""}
               onChange={handleChange}
               placeholder="81"
-              className="border rounded-lg px-3 py-2 w-full"
+              className={`border rounded-lg px-3 py-2 w-full ${
+                errors.bloodPressureDiastolic ? "border-red-400" : ""
+              }`}
             />
+            {errors.bloodPressureDiastolic && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.bloodPressureDiastolic}
+              </p>
+            )}
+            {errors.bloodPressure && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.bloodPressure}
+              </p>
+            )}
           </div>
+
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">혈당 (mg/dL)</label>
+            <label className="block text-gray-700 font-semibold mb-2">
+              혈당 (mg/dL)
+            </label>
             <input
               type="number"
               name="bloodSugar"
               value={form.bloodSugar || ""}
               onChange={handleChange}
-              placeholder="20"
-              className="border rounded-lg px-3 py-2 w-full"
+              placeholder="90"
+              className={`border rounded-lg px-3 py-2 w-full ${
+                errors.bloodSugar ? "border-red-400" : ""
+              }`}
             />
+            {errors.bloodSugar && (
+              <p className="text-red-500 text-sm mt-1">{errors.bloodSugar}</p>
+            )}
           </div>
         </div>
 
         {/* 수면 */}
         <div>
-          <label className="block text-gray-700 font-semibold mb-2">수면 시간 (시간)</label>
+          <label className="block text-gray-700 font-semibold mb-2">
+            수면 시간 (시간)
+          </label>
           <input
             type="number"
             name="sleepHours"
             value={form.sleepHours || ""}
             onChange={handleChange}
             placeholder="7"
-            className="border rounded-lg px-3 py-2 w-full"
+            className={`border rounded-lg px-3 py-2 w-full ${
+              errors.sleepHours ? "border-red-400" : ""
+            }`}
           />
+          {errors.sleepHours && (
+            <p className="text-red-500 text-sm mt-1">{errors.sleepHours}</p>
+          )}
         </div>
 
         {/* 측정일 */}
@@ -565,3 +627,4 @@ function MeasurementEdit({ id, onMypage }) {
 }
 
 export default MeasurementEdit;
+
