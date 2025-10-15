@@ -1,15 +1,13 @@
 export const AdminNavData = [
     {
-        label: "멤버조회",
+        label: "회원관리",
         path: "/admin/main/member",
         children: [
-            { label: "프로젝트 소개", path: "/about/project" },
-            { label: "철학 & 가치", path: "/about/philosophy" },
-            { label: "팀 소개", path: "/about/team" },
+            { label: "회원조회", path: "/about/project" },
         ],
     },
     {
-        label: "게시판 관리",
+        label: "게시판관리",
         path: "/admin/main/board",
         children: [
             { label: "건강정보 등록", path: "/mycare/dashboard" },
