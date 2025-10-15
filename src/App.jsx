@@ -1,34 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import {RouterProvider} from "react-router-dom";
+import router from "./router/router.jsx";
+import {Suspense, useEffect, useState} from "react";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const fetchMember = useAuthStore((state) => state.fetchMember);
+  const loading = useAuthStore((state) => state.loading);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    // localStorage 복원이 완료되면 실행
+    const unsub = useAuthStore.persist.onFinishHydration(() => {
+      console.log("Hydration 완료!"); // 디버깅용
+      setHydrated(true);
+
+      const currentState = useAuthStore.getState();
+      if (currentState.member) {
+        console.log("로그인 상태 확인 중...");
+        fetchMember();
+      } else {
+        console.log("비로그인 상태");
+      }
+    });
+
+    // 즉시 hydration 트리거
+    useAuthStore.persist.rehydrate();
+
+    return unsub;
+  }, []); //zustand는 안정적이라고 해서 필요가 없다고 한다.
+
+  if (!hydrated || loading) {
+    return <div className="p-8 text-center">로딩 중...</div>;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <Suspense fallback={null}>
+        <RouterProvider router={router} />
+      </Suspense>
   )
 }
 
