@@ -20,7 +20,7 @@ export default function QnAModify() {
                 content,
             };
 
-            await api.patch(`http://localhost:8082/api/boards/${id}`, body);
+            await api.patch(`/boards/update/${id}`, body);
             alert("수정 완료!");
             navigate(`/qna/read/${id}`); // 수정 후 단일조회 페이지로 이동
         } catch (err) {

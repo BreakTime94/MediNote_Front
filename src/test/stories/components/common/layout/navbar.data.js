@@ -8,9 +8,9 @@ export const navItems = [
     },
     { label: "마이케어", path: "/mycare",
         children: [
-            { label: "대시보드", path: "/mycare/dashboard" },
-            { label: "복약 관리", path: "/mycare/meds" },
-            { label: "바이탈 로그", path: "/mycare/vitals" },
+            { label: "건강정보 등록", path: "/mycare/register" },
+            { label: "건강정보 조회", path: "/mycare/list" },
+            { label: "건강정보 차트", path: "/mycare/chart" },
         ],
     },
     { label: "헬스인사이트", path: "/insight",
