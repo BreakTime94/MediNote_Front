@@ -36,6 +36,7 @@ function Measurement() {
   const [medicationResults, setMedicationResults] = useState([]);
   const searchTimer = useRef(null);
   const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
 
   //  질환/알러지 전체 불러오기
   useEffect(() => {
@@ -57,7 +58,11 @@ function Measurement() {
   //  공통 입력
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const updatedForm = { ...form, [name]: value };
+    setForm(updatedForm);
+
+    const newErrors = MeasurementValidation(updatedForm);
+    setErrors(newErrors);
   };
 
   //  복용약 검색 (디바운싱)
@@ -81,12 +86,12 @@ function Measurement() {
 
   //  복용약 선택 → 다중 선택 가능
   const handleSelectMedication = (med) => {
-    console.log("🔍 선택한 약:", med);
+    console.log("선택한 약:", med);
 
     if (!form.medications) form.medications = [];
     //  id로 중복 체크
     if (form.medications.some((m) => m.id === med.id)) {
-      console.log(" 중복이라 추가 안 함");
+      console.log("중복이라 추가 안 함");
       return;
     }
 
@@ -478,8 +483,11 @@ function Measurement() {
                 value={form.height || ""}
                 onChange={handleChange}
                 placeholder="169"
-                className="border rounded-lg px-3 py-2 w-full"
+                className={`border rounded-lg px-3 py-2 w-full ${errors.height ? "border-red-400" : ""}`}
               />
+              {errors.height && (
+                <p className="text-red-500 text-sm mt-1">{errors.height}</p>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-2">체중 (kg)</label>
@@ -489,8 +497,11 @@ function Measurement() {
                 value={form.weight || ""}
                 onChange={handleChange}
                 placeholder="73"
-                className="border rounded-lg px-3 py-2 w-full"
+                className={`border rounded-lg px-3 py-2 w-full ${errors.weight ? "border-red-400" : ""}`}
               />
+              {errors.weight && (
+                <p className="text-red-500 text-sm mt-1">{errors.weight}</p>
+              )}
             </div>
           </div>
 
@@ -504,8 +515,13 @@ function Measurement() {
                 value={form.bloodPressureSystolic || ""}
                 onChange={handleChange}
                 placeholder="118"
-                className="border rounded-lg px-3 py-2 w-full"
+                className={`border rounded-lg px-3 py-2 w-full ${errors.bloodPressureSystolic ? "border-red-400" : ""}`}
               />
+              {errors.bloodPressureSystolic && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.bloodPressureSystolic}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-2">이완기 혈압</label>
@@ -515,8 +531,11 @@ function Measurement() {
                 value={form.bloodPressureDiastolic || ""}
                 onChange={handleChange}
                 placeholder="81"
-                className="border rounded-lg px-3 py-2 w-full"
+                className={`border rounded-lg px-3 py-2 w-full ${errors.bloodPressureDiastolic ? "border-red-400" : ""}`}
               />
+              {errors.bloodPressureDiastolic && (<p className="text-red-500 text-sm mt-1">{errors.bloodPressureDiastolic}</p>
+              )}
+              {errors.bloodPressure && (<p className="text-red-500 text-sm mt-1">{errors.bloodPressure}</p>)}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-2">혈당 (mg/dL)</label>
@@ -526,22 +545,25 @@ function Measurement() {
                 value={form.bloodSugar || ""}
                 onChange={handleChange}
                 placeholder="20"
-                className="border rounded-lg px-3 py-2 w-full"
+                className={`border rounded-lg px-3 py-2 w-full ${errors.bloodSugar ? "border-red-400" : ""}`}
               />
+              {errors.bloodSugar && (<p className="text-red-500 text-sm mt-1">{errors.bloodSugar}</p>)}
             </div>
           </div>
 
           {/* 수면 */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">수면 시간 (시간)</label>
+            <label className="block text-gray-700 font-semibold mb-2">수면 시간(h)</label>
             <input
               type="number"
               name="sleepHours"
               value={form.sleepHours || ""}
               onChange={handleChange}
               placeholder="7"
-              className="border rounded-lg px-3 py-2 w-full"
+              className={`border rounded-lg px-3 py-2 w-full ${errors.sleepHours ? "border-red-400" : ""}`}
             />
+            {errors.sleepHours && (<p className="text-red-500 text-sm mt-1">{errors.sleepHours}</p>)}
+
           </div>
         </div>
 
