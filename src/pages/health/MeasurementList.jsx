@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/components/common/api/axiosInterceptor.js";
 import dayjs from "dayjs";
+import {useAuthStore} from "../../components/common/hooks/useAuthStore.jsx";
 
-function TestMeasurementList({ mode = "page", onEdit}) {
+function MeasurementList({ mode = "page", onEdit}) {
+  const { member } = useAuthStore();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,9 @@ function TestMeasurementList({ mode = "page", onEdit}) {
   //건강정보 리스트 api 호출
   const fetchMeasurements = async () => {
     try {
-      const res = await api.get("/health/measurement/list");
+      const res = await api.get("/health/measurement/list" , {
+        header: {"X-Member-Id" : member?.id }
+      });
 
       //응답이 배열일 때만
       setList(Array.isArray(res.data) ? res.data : []);
@@ -73,7 +77,7 @@ function TestMeasurementList({ mode = "page", onEdit}) {
       <div className="text-center text-gray-500 mt-10">
         <p>등록된 건강정보가 없습니다</p>
         <button
-          onClick={() => navigate("/health/measurement/register")}
+          onClick={() => navigate("/health/measurement")}
           className="mt-4 bg-pink-400 text-white px-2 py-2 rounded hover:bg-pink-500 transition">
           새 건강정보 등록하기!(등록 후 조회 가능)
         </button>
@@ -171,4 +175,4 @@ function TestMeasurementList({ mode = "page", onEdit}) {
   )
 }
 
-export default TestMeasurementList;
+export default MeasurementList;

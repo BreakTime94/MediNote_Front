@@ -12,9 +12,9 @@ export const NavData = [
         label: "마이케어",
         path: "/mycare",
         children: [
-            { label: "건강정보 등록", path: "/mycare/dashboard" },
-            { label: "건강정보 조회", path: "/mycare/meds" },
-            { label: "건강정보 차트", path: "/mycare/vitals" },
+            { label: "건강정보 등록", path: "/mycare/register" },
+            { label: "건강정보 조회", path: "/mycare/list" },
+            { label: "건강정보 차트", path: "/mycare/chart" },
         ],
     },
     {
