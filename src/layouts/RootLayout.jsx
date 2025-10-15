@@ -2,6 +2,7 @@ import SiteHeader from "../components/common/header/SiteHeader.jsx";
 import MainNav from "../components/common/nav/MainNav.jsx";
 import {Outlet} from "react-router-dom";
 import SiteFooter from "../components/common/footer/SiteFooter.jsx";
+import {Toaster} from "react-hot-toast";
 
 export default function RootLayout() {
     return (
@@ -21,6 +22,8 @@ export default function RootLayout() {
             <footer>
                 <SiteFooter/>
             </footer>
+          {/* react-hot-toast는 이게 없으면 안 보임 */}
+          <Toaster position="top-center" />
         </div>
     );
 }

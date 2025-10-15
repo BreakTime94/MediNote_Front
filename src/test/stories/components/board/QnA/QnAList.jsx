@@ -23,7 +23,7 @@ export default function QnAList() {
             };
 
             const res = await api.post(
-                "http://localhost:8082/api/boards/qna/list",
+                "/boards/qna/list",
                 body
             );
 

@@ -15,7 +15,7 @@ export default function QnADelete() {
                 reason: "테스트 삭제",
             };
 
-            await api.delete(`http://localhost:8082/api/boards/${id}`, {
+            await api.delete(`/boards/delete/${id}`, {
                 data: body, // axios는 DELETE에 body 보낼 때 data로 명시해야 함
             });
 
