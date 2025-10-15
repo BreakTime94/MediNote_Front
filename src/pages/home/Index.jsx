@@ -4,6 +4,7 @@ import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 import SummarySectionPreview from "@/pages/health/SummarySectionPreview.jsx";
 import { Link } from "react-router-dom";
 import PreviewIndex from "@/pages/home/PreviewIndex.jsx";
+import MiniMapSection from "@/components/map/MiniMapSection.jsx";
 
 export default function Index(){
   const {member, loading, fetchMember} = useAuthStore();
@@ -47,13 +48,9 @@ export default function Index(){
               </div>
             </div>
 
-            {/* 지도 영역 - 50% (오른쪽 여백만) */}
-            <div className="map-section bg-white border-2 border-gray-200 p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-4">지도 🗺️</h2>
-              <div className="text-center text-gray-500 py-20">
-                지도 컴포넌트가 들어갈 자리입니다
-              </div>
-            </div>
+
+          {/* 오른쪽: 미니 지도 */}
+          <MiniMapSection />
           </div>
         </section>
       </div>
