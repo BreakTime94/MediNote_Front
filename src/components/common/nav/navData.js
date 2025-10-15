@@ -12,9 +12,9 @@ export const NavData = [
         label: "마이케어",
         path: "/mycare",
         children: [
-            { label: "건강정보 등록", path: "/mycare/dashboard" },
-            { label: "건강정보 조회", path: "/mycare/meds" },
-            { label: "건강정보 차트", path: "/mycare/vitals" },
+            { label: "건강정보 등록", path: "/mycare/register" },
+            { label: "건강정보 조회", path: "/mycare/list" },
+            { label: "건강정보 차트", path: "/mycare/chart" },
         ],
     },
     {
@@ -37,7 +37,7 @@ export const NavData = [
     },
     {
         label: "내주변 병원",
-        path: "/nearby",
+        path: "/map",
         children: [
             { label: "내과", path: "/nearby/internal" },
             { label: "정형외과", path: "/nearby/ortho" },
@@ -45,15 +45,12 @@ export const NavData = [
         ],
     },
     {
-        label: "커뮤니티",
-        path: "/community",
+        label: "고객지원",
+        path: "/boards/notice",
         children: [
-            { label: "자유게시판", path: "/community/free" },
-            { label: "질문답변", path: "/community/qna" },
-            { label: "건강후기", path: "/community/reviews" },
-            { label: "챌린지", path: "/community/challenges" },
-            { label: "모임", path: "/community/meetups" },
-            { label: "전문가 상담", path: "/community/expert" },
+            { label: "공지사항", path: "/boards/notice" },
+            { label: "자주 묻는 질문(FAQ)", path: "/boards/faq" },
+            { label: "질문답변(QnA)", path: "/boards/qna" },
         ],
     },
 
