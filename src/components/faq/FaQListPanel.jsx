@@ -1,20 +1,12 @@
+// src/components/faq/FaqListPanel.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";          // ✅ Link 제거
 import api from "../common/api/axiosInterceptor.js";
 
 /**
  * FaqListPanel - FAQ 게시판 목록 컴포넌트
- *
- * props
- * - initialKeyword?: string
- * - pageSizeOptions?: number[]      (기본: [5, 10, 20])
- * - defaultSize?: number            (기본: 10)
- * - showWriteButton?: boolean       (기본: true)
- * - onWrite?: () => void            (기본: /faq/write 로 이동)
- * - onRead?: (id: number) => void   (기본: /faq/read/:id 로 이동)
- * - adminMode?: boolean             (관리자 수정/삭제 버튼 노출 여부)
  */
-export default function FaqListPanel({
+export default function FaQListPanel({
                                          initialKeyword = "",
                                          pageSizeOptions = [5, 10, 20],
                                          defaultSize = 10,
@@ -37,9 +29,9 @@ export default function FaqListPanel({
 
     const totalPages = useMemo(() => Math.max(1, Math.ceil(total / size)), [total, size]);
 
-    // 네비게이션 콜백
-    const goWrite = () => (onWrite ? onWrite() : navigate("/faq/write"));
-    const goRead = (id) => (onRead ? onRead(id) : navigate(`/faq/read/${id}`));
+    // ✅ 라우터에 맞춘 네비게이션 콜백
+    const goWrite = () => (onWrite ? onWrite() : navigate("/boards/faq/write"));
+    const goRead  = (id) => (onRead ? onRead(id) : navigate(`/boards/faq/read/${id}`));
 
     // 날짜 포맷
     const fmtDate = (iso) => {
@@ -166,8 +158,7 @@ export default function FaqListPanel({
                                         <span className="font-medium">{faq.title}</span>
                                     </button>
                                     <div className="mt-1 md:hidden text-xs text-gray-500">
-                                        {fmtDate(faq.regDate)} ·{" "}
-                                        {faq.isPublic === false ? "비공개" : "공개"}
+                                        {fmtDate(faq.regDate)} · {faq.isPublic === false ? "비공개" : "공개"}
                                     </div>
                                 </div>
 
@@ -198,9 +189,7 @@ export default function FaqListPanel({
                             onClick={() => fetchData(p)}
                             className={
                                 "px-3 py-1.5 text-sm rounded-lg ring-1 " +
-                                (p === page
-                                    ? "bg-gray-900 text-white ring-gray-900"
-                                    : "ring-gray-200 hover:bg-gray-50")
+                                (p === page ? "bg-gray-900 text-white ring-gray-900" : "ring-gray-200 hover:bg-gray-50")
                             }
                         >
                             {p}
