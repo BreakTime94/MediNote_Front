@@ -50,21 +50,21 @@ function RegisterEmailField({ member, touched, errors, emailStatus, handleBlur, 
 
         {/* 인증 코드 입력창 + 확인 버튼 */}
         {showCodeInput && !verification && (
-            <div className="mt-2 flex space-x-2">
+            <div className="mt-2 flex gap-2 items-center">
               <input
                   type="text"
                   name="verificationCode"
                   placeholder="인증코드 입력"
-                  className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400  disabled:bg-gray-200"
+                  className="px-1 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400  disabled:bg-gray-200"
                   disabled={verification}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
               />
               {leftTime &&
-                  (<span className={"text-xs text-gray-500 my-auto font-bold"}>{formatTime(leftTime)}</span>)}
+                  (<span className={"text-xs text-gray-500 w-8 font-bold shrink-0"}>{formatTime(leftTime)}</span>)}
               <button
                   type="button"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-amber-100"
+                  className="shrink-0 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-amber-100"
                   disabled={verification}
                   onClick={() => verifyCode(member.email, verification, setVerification, "signUp")}
               >
