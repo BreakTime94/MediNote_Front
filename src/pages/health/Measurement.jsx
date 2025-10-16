@@ -172,7 +172,7 @@ function Measurement() {
     try {
       await api.post("/health/measurement", payload);
       alert(" 건강정보가 등록되었습니다.");
-      navigate("/health/measurement/list");
+      navigate("/mycare/list");
       setForm(initialHealthForm);
       setChronicSearch("");
       setAllergySearch("");
