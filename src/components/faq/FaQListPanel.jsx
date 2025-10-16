@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../common/api/axiosInterceptor.js";
+import { getCategoryName } from "../common/constants/boardCategory.js"; // ✅ 추가
 
 /**
  * FaqListPanel - FAQ 게시판 목록 컴포넌트
@@ -51,7 +52,7 @@ export default function FaqListPanel({
         ).padStart(2, "0")}`;
     };
 
-    // 데이터 조회
+    // ✅ 데이터 조회 + 카테고리명 변환
     const fetchData = async (nextPage = 1) => {
         setLoading(true);
         setError("");
@@ -63,7 +64,14 @@ export default function FaqListPanel({
                 criteria: { page: nextPage, size },
             };
             const res = await api.post("/boards/faq/list", body);
-            setItems(res.data?.items || []);
+
+            // ✅ boardCategoryId → boardCategoryName 변환 추가
+            const mapped = (res.data?.items || []).map((item) => ({
+                ...item,
+                boardCategoryName: getCategoryName(item.boardCategoryId, true),
+            }));
+
+            setItems(mapped);
             setTotal(res.data?.page?.totalElements ?? res.data?.totalElements ?? 0);
             setPage(nextPage);
         } catch (e) {
@@ -165,9 +173,18 @@ export default function FaqListPanel({
                                     >
                                         <span className="font-medium">{faq.title}</span>
                                     </button>
+
+                                    {/* ✅ 카테고리 이름 표시 */}
+                                    {faq.boardCategoryName && (
+                                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] md:text-xs px-2 py-0.5 rounded-full bg-gray-50 ring-1 ring-gray-200 text-gray-600">
+                        {faq.boardCategoryName}
+                      </span>
+                                        </div>
+                                    )}
+
                                     <div className="mt-1 md:hidden text-xs text-gray-500">
-                                        {fmtDate(faq.regDate)} ·{" "}
-                                        {faq.isPublic === false ? "비공개" : "공개"}
+                                        {fmtDate(faq.regDate)} · {faq.isPublic === false ? "비공개" : "공개"}
                                     </div>
                                 </div>
 

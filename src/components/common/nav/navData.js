@@ -19,11 +19,11 @@ export const NavData = [
     },
     {
         label: "헬스인사이트",
-        path: "/insight",
+        path: "/news",
         children: [
-            { label: "뉴스", path: "/insight/news" },
-            { label: "칼럼", path: "/insight/column" },
-            { label: "생활 팁", path: "/insight/tips" },
+            { label: "뉴스",     path: "/news" },
+            { label: "칼럼",     path: "/columns" },
+            { label: "건강정보", path: "/health-info" },
         ],
     },
     {

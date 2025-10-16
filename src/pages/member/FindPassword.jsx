@@ -149,7 +149,7 @@ export default function FindPassword() {
             <ul className="text-sm text-gray-600 pl-2">
               <li className="flex gap-2">
                 <span>&middot;</span>
-                <span>비밀번호 찾기는 소셜회원은 사용하실 수 없습니다. 가입하셨던 소셜 사이트에 문의하여 주시기 바랍니다.</span>
+                <span>비밀번호 찾기는 소셜 최초 가입 회원은 사용하실 수 없습니다.</span>
               </li>
               <li className="flex gap-2">
                 <span>&middot;</span>

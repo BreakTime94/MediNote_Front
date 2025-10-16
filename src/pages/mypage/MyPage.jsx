@@ -29,7 +29,6 @@ export default function MyPage() {
     }
     baseItems.push(
     { id: "measurementlist", label: "내 건강정보 리스트", actionType: "component" },
-    // { id: "measurementedit", label: "건강정보 수정", actionType: "component" },
     { id: "measurementchart", label: "내 건강정보 차트", actionType: "component" },
     );
     return baseItems;
