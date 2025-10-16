@@ -11,6 +11,7 @@ import SummarySectionPreview from "@/pages/health/SummarySectionPreview.jsx";
 import ProtectedRoute from "./protector/ProtectionRoute.jsx";
 import measurementRouter from "./health/measurementRouter.jsx";
 import BoardRouter from "@/router/board/BoardRouter.jsx";
+import newsRouter from "@/router/news/newsRouter.jsx";
 
 //Lazy 로드
 const Index = lazy(() => import("../pages/home/Index.jsx"))
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
             // 지도 관련 라우터 ✅
             ...mapRouter,
             ...BoardRouter,
+            ...newsRouter,
             // 보호 구간: 가드로 감싸서 하위 라우트 보호, 인증 필요한 페이지
             {
               element: <ProtectedRoute />,

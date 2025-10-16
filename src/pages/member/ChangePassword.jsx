@@ -1,11 +1,12 @@
 import React, {useState} from "react";
 import useCheckPassword from "./useCheckPassword.jsx";
-import axios from "axios";
 import {show} from "@/test/stories/components/common/ui/toast/commonToast.jsx";
 import {useNavigate} from "react-router-dom";
 import api from "@/components/common/api/axiosInterceptor.js";
+import {useAuthStore} from "@/components/common/hooks/useAuthStore.jsx";
 
 export default function ChangePassword() {
+  const{logout} = useAuthStore();
   const navigate = useNavigate();
   const[oldPassword, setOldPassword] = useState("");
   const[touched, setTouched] = useState({
@@ -61,13 +62,15 @@ export default function ChangePassword() {
             title: resp.data.status,
             desc: resp.data.message
           })
-          navigate("/member/login")
+          logout();
+          navigate("/member/login");
         })
         .catch((error) => {
           show.error({
             title: error.data.code,
             desc: error.data.message
           })
+          navigate("/member/mypage");
         })
   }
 
