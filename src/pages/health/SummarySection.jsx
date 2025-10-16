@@ -23,7 +23,7 @@ export default function SummarySection() {
       const res = await api.get("/health/measurement/summary", {
         headers: {
           "Cache-Control": "no-cache",
-          "X-Member-Id": member?.id
+          // "X-Member-Id": member?.id
         },
       });
 
