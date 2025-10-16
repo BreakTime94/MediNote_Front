@@ -21,19 +21,19 @@ export default function ToastCard({
         // toast.dismiss(t.id);
     };
 
-    const tone =
-        ({
-            success: "bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-100",
-            error:   "bg-rose-50 text-rose-900 border-rose-200 dark:bg-rose-900/30 dark:text-rose-100",
-            warning: "bg-amber-50 text-amber-900 border-amber-200 dark:bg-amber-900/30 dark:text-amber-100",
-            info:    "bg-sky-50 text-sky-900 border-sky-200 dark:bg-sky-900/30 dark:text-sky-100",
-            loading: "bg-zinc-50 text-zinc-900 dark:bg-zinc-900/50 dark:text-zinc-100",
-            action:  "bg-indigo-50 text-indigo-900 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-100",
-            offline: "bg-zinc-100 text-zinc-900 border-zinc-200 dark:bg-zinc-900/50 dark:text-zinc-100",
-            copied:  "bg-sky-50 text-sky-900 border-sky-200 dark:bg-sky-900/30 dark:text-sky-100",
-            formerr: "bg-rose-50 text-rose-900 border-rose-200 dark:bg-rose-900/30 dark:text-rose-100",
-            perm:    "bg-purple-50 text-purple-900 border-purple-200 dark:bg-purple-900/30 dark:text-purple-100",
-        }[type]) ?? "bg-sky-50 text-sky-900 border-sky-200";
+  const tone =
+      ({
+        success: "bg-emerald-500 text-white border-emerald-600 dark:bg-emerald-600 dark:text-white dark:border-emerald-700",
+        error:   "bg-rose-500 text-white border-rose-600 dark:bg-rose-600 dark:text-white dark:border-rose-700",
+        warning: "bg-amber-500 text-white border-amber-600 dark:bg-amber-600 dark:text-white dark:border-amber-700",
+        info:    "bg-sky-500 text-white border-sky-600 dark:bg-sky-600 dark:text-white dark:border-sky-700",
+        loading: "bg-zinc-500 text-white border-zinc-600 dark:bg-zinc-600 dark:text-white dark:border-zinc-700",
+        action:  "bg-indigo-500 text-white border-indigo-600 dark:bg-indigo-600 dark:text-white dark:border-indigo-700",
+        offline: "bg-zinc-600 text-white border-zinc-700 dark:bg-zinc-700 dark:text-white dark:border-zinc-800",
+        copied:  "bg-sky-500 text-white border-sky-600 dark:bg-sky-600 dark:text-white dark:border-sky-700",
+        formerr: "bg-rose-500 text-white border-rose-600 dark:bg-rose-600 dark:text-white dark:border-rose-700",
+        perm:    "bg-purple-500 text-white border-purple-600 dark:bg-purple-600 dark:text-white dark:border-purple-700",
+      }[type]) ?? "bg-sky-500 text-white border-sky-600";
 
     const Icon = (
         {
