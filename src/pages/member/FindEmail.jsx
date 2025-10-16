@@ -59,7 +59,7 @@ export default function FindEmail() {
 
   return (
       <div className="flex items-center justify-center bg-white pt-16">
-        <div className="mb-4 mx-auto bg-white shadow-lg rounded-2xl border p-8 w-120">
+        <div className="mb-4 mx-auto bg-white shadow-lg rounded-2xl border p-8 w-140">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             이메일
           </label>
@@ -153,6 +153,17 @@ export default function FindEmail() {
                 <li className="text-red-500">{errors.extraEmail}</li>
               </ul>
           )}
+          <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex items-center space-x-2 mb-1">
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span className="font-semibold text-xm text-gray-800">유의사항</span>
+            </div>
+            <p className="text-sm text-gray-600 ml-7">
+              아이디 찾기는 추가 이메일을 인증하신 회원만 사용하실 수 있습니다.
+            </p>
+          </div>
         </div>
       </div>
   );
