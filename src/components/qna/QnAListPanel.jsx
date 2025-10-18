@@ -2,18 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../common/api/axiosInterceptor.js";
 
-/**
- * QnAListPanel - 중앙 컨텐츠영역에 배치하는 재사용 컴포넌트
- *
- * props
- * - initialStatus?: "ALL" | "WAITING" | "ANSWERED" (기본: "ALL")
- * - initialKeyword?: string
- * - pageSizeOptions?: number[]               (기본: [5, 10, 20])
- * - defaultSize?: number                     (기본: 10)
- * - showWriteButton?: boolean                (기본: true)
- * - onWrite?: () => void                     (기본: /qna/write 로 이동)
- * - onRead?: (id: number) => void            (기본: /qna/read/:id 로 이동)
- */
 export default function QnAListPanel({
                                          initialStatus = "ALL",
                                          initialKeyword = "",
@@ -25,15 +13,15 @@ export default function QnAListPanel({
                                      }) {
     const navigate = useNavigate();
 
-    // 상태
+    // 상태 정의
     const [status, setStatus] = useState(initialStatus);
     const [keyword, setKeyword] = useState(initialKeyword);
     const [size, setSize] = useState(defaultSize);
     const [page, setPage] = useState(1);
-
     const [items, setItems] = useState([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [memberMap, setMemberMap] = useState({}); // ✅ 작성자 닉네임 매핑용
 
     const totalPages = useMemo(() => Math.max(1, Math.ceil(total / size)), [total, size]);
 
@@ -44,11 +32,23 @@ export default function QnAListPanel({
                 ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
                 : "bg-gray-50 text-gray-700 ring-1 ring-gray-200";
 
-    // 기본 내비게이션 콜백
     const goWrite = () => (onWrite ? onWrite() : navigate("/boards/qna/write"));
     const goRead = (id) => (onRead ? onRead(id) : navigate(`/boards/qna/read/${id}`));
 
-    // 데이터 조회
+    // ✅ 작성자 정보 불러오기
+    const fetchMemberList = async () => {
+        try {
+            const res = await api.get("/member/list/info");
+            const list = res.data?.memberInfoList || [];
+            const map = {};
+            list.forEach((m) => (map[m.id] = m.nickname));
+            setMemberMap(map);
+        } catch (e) {
+            console.error("회원 목록 불러오기 실패:", e);
+        }
+    };
+
+    // ✅ QnA 목록 불러오기
     const fetchData = async (nextPage = 1) => {
         setLoading(true);
         try {
@@ -70,8 +70,10 @@ export default function QnAListPanel({
         }
     };
 
+    // ✅ 초기 데이터 로드
     useEffect(() => {
-        fetchData(1);
+        fetchMemberList(); // 작성자 목록
+        fetchData(1); // QnA 목록
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, size]);
 
@@ -86,7 +88,9 @@ export default function QnAListPanel({
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h2 className="text-2xl font-semibold text-gray-900">QnA</h2>
-                    <p className="text-sm text-gray-500 mt-1">궁금한 점을 검색하거나 질문을 남겨보세요.</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                        궁금한 점을 검색하거나 질문을 남겨보세요.
+                    </p>
                 </div>
                 {showWriteButton && (
                     <button
@@ -150,11 +154,12 @@ export default function QnAListPanel({
 
             {/* 리스트 */}
             <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                {/* 헤더 */}
                 <div className="grid grid-cols-12 gap-2 px-4 md:px-6 py-3 text-xs md:text-sm text-gray-500 bg-gray-50">
-                    <div className="col-span-7 md:col-span-7">제목</div>
+                    <div className="col-span-6 md:col-span-6">제목</div>
+                    <div className="hidden md:block md:col-span-2 text-center">작성자</div> {/* ✅ 추가 */}
                     <div className="hidden md:block md:col-span-2 text-center">작성일</div>
-                    <div className="hidden md:block md:col-span-1 text-center">조회</div>
-                    <div className="col-span-5 md:col-span-2 text-center">상태</div>
+                    <div className="col-span-4 md:col-span-2 text-center">상태</div>
                 </div>
 
                 {loading ? (
@@ -165,7 +170,8 @@ export default function QnAListPanel({
                     <ul className="divide-y divide-gray-100">
                         {items.map((qna) => (
                             <li key={qna.id} className="grid grid-cols-12 gap-2 px-4 md:px-6 py-4">
-                                <div className="col-span-12 md:col-span-7">
+                                {/* 제목 */}
+                                <div className="col-span-12 md:col-span-6">
                                     <button
                                         onClick={() => goRead(qna.id)}
                                         className="text-left text-gray-900 hover:underline"
@@ -173,34 +179,23 @@ export default function QnAListPanel({
                                     >
                                         <span className="font-medium">{qna.title}</span>
                                     </button>
-                                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                        {qna.boardCategoryName && (
-                                            <span className="text-[11px] md:text-xs px-2 py-0.5 rounded-full bg-gray-50 ring-1 ring-gray-200 text-gray-600">
-                        {qna.boardCategoryName}
-                      </span>
-                                        )}
-                                        {qna.isPublic === false && (
-                                            <span className="text-[11px] md:text-xs px-2 py-0.5 rounded-full bg-gray-50 ring-1 ring-gray-200 text-gray-600">
-                        비공개
-                      </span>
-                                        )}
-                                    </div>
-                                    <div className="mt-2 md:hidden text-xs text-gray-500">
-                                        {qna.regDate?.slice(0, 10)} · 조회 {qna.views ?? 0}
-                                    </div>
                                 </div>
 
+                                {/* ✅ 작성자 표시 */}
+                                <div className="hidden md:flex md:col-span-2 items-center justify-center text-sm text-gray-700">
+                                    {memberMap[qna.memberId] ?? "-"}
+                                </div>
+
+                                {/* 작성일 */}
                                 <div className="hidden md:flex md:col-span-2 items-center justify-center text-sm text-gray-600">
                                     {qna.regDate?.slice(0, 10) ?? "-"}
                                 </div>
 
-                                <div className="hidden md:flex md:col-span-1 items-center justify-center text-sm text-gray-600">
-                                    {qna.views ?? 0}
-                                </div>
-
-                                {/* 상태만 표시 (수정/삭제 버튼 제거) */}
-                                <div className="col-span-12 md:col-span-2 flex items-center justify-end md:justify-end">
-                  <span className={`px-2.5 py-1 rounded-full text-xs ${statusColor(qna.qnaStatus)}`}>
+                                {/* 상태 */}
+                                <div className="col-span-12 md:col-span-2 flex items-center justify-center">
+                  <span
+                      className={`px-2.5 py-1 rounded-full text-xs ${statusColor(qna.qnaStatus)}`}
+                  >
                     {qna.qnaStatus === "ANSWERED"
                         ? "답변완료"
                         : qna.qnaStatus === "WAITING"
@@ -228,7 +223,9 @@ export default function QnAListPanel({
                             onClick={() => fetchData(p)}
                             className={
                                 "px-3 py-1.5 text-sm rounded-lg ring-1 " +
-                                (p === page ? "bg-gray-900 text-white ring-gray-900" : "ring-gray-200 hover:bg-gray-50")
+                                (p === page
+                                    ? "bg-gray-900 text-white ring-gray-900"
+                                    : "ring-gray-200 hover:bg-gray-50")
                             }
                         >
                             {p}
