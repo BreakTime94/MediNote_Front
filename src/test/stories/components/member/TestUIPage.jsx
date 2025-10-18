@@ -135,6 +135,11 @@ function testUIPage(props) {
             <GoogleLoginButton></GoogleLoginButton>
           </div>
         </div>
+        <button onClick={() => {
+          navigate("/member/infoTest")
+        }}>
+          MemberInfoTest
+        </button>
       </div>
   );
 }
