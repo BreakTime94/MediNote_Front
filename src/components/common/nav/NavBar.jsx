@@ -2,12 +2,6 @@ import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useState, useRef } from "react";
 
-/**
- * props:
- *  - items: navData 배열
- *  - align: "left" | "center" | "right"
- *  - className, gap: 추가 스타일
- */
 function NavBar(props) {
     const {
         items = [],
@@ -17,7 +11,21 @@ function NavBar(props) {
     } = props;
 
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const navRef = useRef(null);
+    const closeTimeoutRef = useRef(null); // ✅ 딜레이 타이머용 ref
+
+    // 마우스 진입 시 즉시 오픈 + 닫기 타이머 취소
+    const handleMouseEnter = (index) => {
+        clearTimeout(closeTimeoutRef.current);
+        setActiveDropdown(index);
+    };
+
+    // 마우스가 나갔을 때 200ms 뒤 닫기
+    const handleMouseLeave = () => {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = setTimeout(() => {
+            setActiveDropdown(null);
+        }, 200);
+    };
 
     const navClass = clsx(
         "flex items-center w-full",
@@ -31,29 +39,15 @@ function NavBar(props) {
     );
 
     return (
-        <nav
-            ref={navRef}
-            className={navClass}
-            role="navigation"
-            aria-label="메인 네비게이션"
-        >
+        <nav className={navClass} role="navigation" aria-label="메인 네비게이션">
             {items.map((item, index) => (
                 <NavItem
                     key={item.path ?? item.label}
                     item={item}
                     index={index}
                     isActive={activeDropdown === index}
-                    onMouseEnter={() => setActiveDropdown(index)}
-                    onMouseLeave={() => setActiveDropdown(null)}
-                    onFocus={() => setActiveDropdown(index)}
-                    onBlur={(e) => {
-                        setTimeout(() => {
-                            const currentTarget = e.currentTarget;
-                            if (!currentTarget.contains(document.activeElement)) {
-                                setActiveDropdown(null);
-                            }
-                        }, 0);
-                    }}
+                    onMouseEnter={() => handleMouseEnter(index)}
+                    onMouseLeave={handleMouseLeave}
                 />
             ))}
         </nav>
@@ -66,8 +60,6 @@ function NavItem({
                      isActive,
                      onMouseEnter,
                      onMouseLeave,
-                     onFocus,
-                     onBlur
                  }) {
     const {
         label,
@@ -79,14 +71,6 @@ function NavItem({
         rel,
     } = item;
 
-    const parentClass = ({ isActive: isRouteActive }) =>
-        clsx(
-            "block px-4 py-3 mx-2 text-sm font-medium transition-all duration-200 rounded-lg",
-            "hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900",
-            disabled && "pointer-events-none opacity-50",
-            isRouteActive ? "bg-gray-100 text-gray-900" : "text-gray-700"
-        );
-
     const hasChildren = children.length > 0 && !disabled;
 
     return (
@@ -94,12 +78,17 @@ function NavItem({
             className="relative flex-1 flex justify-center"
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            onFocus={onFocus}
-            onBlur={onBlur}
         >
             <NavLink
                 to={path}
-                className={parentClass}
+                className={({ isActive: isRouteActive }) =>
+                    clsx(
+                        "block px-4 py-3 mx-2 text-sm font-medium transition-all duration-200 rounded-lg",
+                        "hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900",
+                        disabled && "pointer-events-none opacity-50",
+                        isRouteActive ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                    )
+                }
                 target={target}
                 rel={rel}
                 aria-haspopup={hasChildren}
@@ -111,39 +100,33 @@ function NavItem({
                 </div>
             </NavLink>
 
-            {/* 개별 드롭다운 */}
             {hasChildren && isActive && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 z-50 mt-2 min-w-48 bg-white border border-gray-200 rounded-xl shadow-lg">
-                    <div className="py-4 px-2">
+                <div
+                    className="absolute top-full left-1/2 transform -translate-x-1/2 z-50 mt-2 min-w-48 bg-white border border-gray-200 rounded-xl shadow-lg"
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                >
+                    <div className="py-3 px-2">
                         <div className="space-y-1">
-                            {children.map((child) => {
-                                const {
-                                    label: cLabel,
-                                    path: cPath = "#",
-                                    target: cTarget,
-                                    rel: cRel
-                                } = child;
-
-                                return (
-                                    <NavLink
-                                        key={cPath}
-                                        to={cPath}
-                                        target={cTarget}
-                                        rel={cRel}
-                                        className={({ isActive: isRouteActive }) =>
-                                            clsx(
-                                                "block rounded-lg px-4 py-2 text-sm transition-colors duration-150",
-                                                "hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900",
-                                                isRouteActive
-                                                    ? "bg-blue-50 text-blue-700 font-medium"
-                                                    : "text-gray-600"
-                                            )
-                                        }
-                                    >
-                                        {cLabel}
-                                    </NavLink>
-                                );
-                            })}
+                            {children.map((child) => (
+                                <NavLink
+                                    key={child.path}
+                                    to={child.path}
+                                    target={child.target}
+                                    rel={child.rel}
+                                    className={({ isActive: isRouteActive }) =>
+                                        clsx(
+                                            "block rounded-lg px-4 py-2 text-sm transition-colors duration-150",
+                                            "hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900",
+                                            isRouteActive
+                                                ? "bg-blue-50 text-blue-700 font-medium"
+                                                : "text-gray-600"
+                                        )
+                                    }
+                                >
+                                    {child.label}
+                                </NavLink>
+                            ))}
                         </div>
                     </div>
                 </div>
