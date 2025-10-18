@@ -45,8 +45,8 @@ export default function QnAListPanel({
                 : "bg-gray-50 text-gray-700 ring-1 ring-gray-200";
 
     // 기본 내비게이션 콜백
-    const goWrite = () => (onWrite ? onWrite() : navigate("/qna/write"));
-    const goRead = (id) => (onRead ? onRead(id) : navigate(`/qna/read/${id}`));
+    const goWrite = () => (onWrite ? onWrite() : navigate("/boards/qna/write"));
+    const goRead = (id) => (onRead ? onRead(id) : navigate(`/boards/qna/read/${id}`));
 
     // 데이터 조회
     const fetchData = async (nextPage = 1) => {
