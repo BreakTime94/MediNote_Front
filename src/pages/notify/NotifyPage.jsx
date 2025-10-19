@@ -1,6 +1,6 @@
 // src/pages/notice/NotifyPage.jsx
 import React from "react";
-import NotifyListPanel from "../../components/notifiy/NotifyListPanel.jsx";
+import NotifyListPanel from "../../components/notify/NotifyListPanel.jsx";
 
 export default function NotifyPage() {
     return (
