@@ -23,8 +23,12 @@ export default function GoogleLoginButton() {
       if (event.origin !== "http://localhost:8083") return;
 
       console.log("로그인 결과:", event.data);
-      const{status, provider, member} = event.data;
+      const{status, provider, member, message} = event.data;
       if (status === "LOGIN_SUCCESS") {
+        show.success({
+          title: status,
+          desc: message
+        })
         setMember({...member, provider})
         // 기존 회원 → 홈 화면으로
         navigate("/");

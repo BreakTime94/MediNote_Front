@@ -95,7 +95,7 @@ function MeasurementChart() {
       // 🔥 실제 API 호출
       const res = await api.get("/health/measurement/chart", {
         params: { period },
-        headers: { "X-Member-Id": member?.id }
+        // headers: { "X-Member-Id": member?.id }
       });
 
       console.log("📊 차트 데이터:", res.data);
