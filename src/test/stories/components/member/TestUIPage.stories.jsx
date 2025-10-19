@@ -8,6 +8,7 @@ import SocialRegister from "./assets/SocialRegister.jsx";
 import ChangePassword from "./ChangePassword.jsx";
 import FindEmail from "./FindEmail.jsx";
 import FindPassword from "./FindPassword.jsx";
+import MemberInfoTest from "@/test/stories/components/member/list/MemberInfoTest.jsx";
 
 
 export default {
@@ -24,7 +25,8 @@ export default {
       {path: "/social/signup", element: <SocialRegister/>},
       {path: "/member/mypage/changepassword", element: <ChangePassword/>},
       {path:"/member/findEmail", element: <FindEmail/>},
-      {path: "/member/resetPassword", element: <FindPassword/>}
+      {path: "/member/resetPassword", element: <FindPassword/>},
+      {path: "/member/infoTest", element: <MemberInfoTest/> }
     ]
   }
 };

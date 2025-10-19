@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../common/api/axiosInterceptor.js";
+import { useAuthStore } from "@/components/common/hooks/useAuthStore.jsx";
 
 /**
  * NotifyListPanel - 공지사항 게시판 목록 컴포넌트
@@ -25,6 +26,17 @@ export default function NotifyListPanel({
                                         }) {
     const navigate = useNavigate();
 
+    const { member, loading: authLoading, fetchMember } = useAuthStore();
+
+    // 멤버 정보 없으면 한번 가져오기(선택)
+    useEffect(() => {
+        if (!member && !authLoading && fetchMember) {
+                fetchMember();
+                }
+            }, [member, authLoading, fetchMember]);
+
+    const isAdmin = member?.role === "ADMIN";
+
     // 상태
     const [keyword, setKeyword] = useState(initialKeyword);
     const [size, setSize] = useState(defaultSize);
@@ -38,8 +50,14 @@ export default function NotifyListPanel({
     const totalPages = useMemo(() => Math.max(1, Math.ceil(total / size)), [total, size]);
 
     // 기본 네비게이션
-    const goWrite = () => (onWrite ? onWrite() : navigate("/notice/write"));
-    const goRead = (id) => (onRead ? onRead(id) : navigate(`/notice/read/${id}`));
+    const goWrite = () => {
+        if (!isAdmin) {
+            alert("관리자만 공지를 등록할 수 있습니다.");
+            return;
+            }
+        return onWrite ? onWrite() : navigate("/boards/notice/write");
+        };
+    const goRead = (id) => (onRead ? onRead(id) : navigate(`/boards/notice/read/${id}`));
 
     // 날짜 포맷
     const fmtDate = (iso) => {
@@ -94,7 +112,7 @@ export default function NotifyListPanel({
                         메디노트의 새로운 소식과 업데이트를 확인하세요.
                     </p>
                 </div>
-                {showWriteButton && (
+                {showWriteButton && isAdmin && (
                     <button
                         onClick={goWrite}
                         className="rounded-2xl px-4 py-2 shadow-sm text-white bg-gradient-to-r from-pink-300 to-purple-300 hover:opacity-90 transition"

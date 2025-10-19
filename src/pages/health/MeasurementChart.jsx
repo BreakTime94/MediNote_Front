@@ -14,7 +14,7 @@ import {
   Dot
 } from "recharts";
 import dayjs from "dayjs";
-import { TrendingUp, TrendingDown, Minus, Award } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Award, Activity, HelpCircle, X } from "lucide-react";
 
 // 하루 중 가장 최신 데이터만 남기기
 const latestByDate = (list) => {
@@ -54,6 +54,193 @@ const calculateStats = (data, key) => {
   return { avg: avg.toFixed(1), change: change.toFixed(1), changePercent, trend, best: best.toFixed(1), recent: recent.toFixed(1) };
 };
 
+// 건강점수 등급 계산
+const getHealthScoreGrade = (score) => {
+  if (score >= 95) return { grade: 'A+', color: '#10B981', label: '매우 우수' };
+  if (score >= 90) return { grade: 'A', color: '#34D399', label: '우수' };
+  if (score >= 85) return { grade: 'B+', color: '#60A5FA', label: '양호' };
+  if (score >= 80) return { grade: 'B', color: '#93C5FD', label: '보통' };
+  if (score >= 70) return { grade: 'C', color: '#FBBF24', label: '주의' };
+  return { grade: 'D', color: '#F87171', label: '관리 필요' };
+};
+
+// 산정 기준 모달
+const ScoreCriteriaModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        {/* 헤더 */}
+        <div className="sticky top-0 bg-gradient-to-r from-pink-400 to-purple-500 text-white p-6 rounded-t-2xl flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <Activity className="w-6 h-6" />
+            <h2 className="text-2xl font-bold">건강점수 산정 기준</h2>
+          </div>
+          <button onClick={onClose} className="hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* 내용 */}
+        <div className="p-6">
+          {/* 총점 안내 */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-xl mb-6 border border-purple-200">
+            <p className="text-center text-lg font-semibold text-gray-800">
+              총 <span className="text-3xl text-purple-600 font-bold">100점</span> 만점
+            </p>
+          </div>
+
+          {/* 항목별 배점 */}
+          <div className="space-y-4 mb-6">
+            <ScoreItem
+              title="체중/BMI"
+              points={20}
+              color="#EC4899"
+              description="정상 BMI 범위(18.5~24.9) 유지 시 만점"
+              details={[
+                "BMI 18.5~24.9: 20점 (만점)",
+                "BMI 25~29.9: 15점 (과체중)",
+                "BMI 30 이상: 10점 (비만)",
+                "BMI 18.5 미만: 12점 (저체중)"
+              ]}
+            />
+
+            <ScoreItem
+              title="혈압"
+              points={20}
+              color="#F59E0B"
+              description="수축기/이완기 혈압이 정상 범위일 때 만점"
+              details={[
+                "수축기 120 미만, 이완기 80 미만: 20점 (만점)",
+                "수축기 120~139, 이완기 80~89: 15점 (주의)",
+                "수축기 140 이상, 이완기 90 이상: 10점 (고혈압)"
+              ]}
+            />
+
+            <ScoreItem
+              title="혈당"
+              points={20}
+              color="#6366F1"
+              description="공복 혈당이 정상 범위일 때 만점"
+              details={[
+                "70~99 mg/dL: 20점 (만점)",
+                "100~125 mg/dL: 15점 (공복혈당장애)",
+                "126 mg/dL 이상: 10점 (당뇨 의심)",
+                "70 mg/dL 미만: 12점 (저혈당)"
+              ]}
+            />
+
+            <ScoreItem
+              title="수면"
+              points={15}
+              color="#14B8A6"
+              description="하루 7~8시간 수면 시 만점"
+              details={[
+                "7~8시간: 15점 (만점)",
+                "6~7시간 또는 8~9시간: 12점",
+                "5~6시간 또는 9시간 이상: 8점",
+                "5시간 미만: 5점"
+              ]}
+            />
+
+            <ScoreItem
+              title="운동"
+              points={15}
+              color="#8B5CF6"
+              description="주 3회 이상 규칙적인 운동"
+              details={[
+                "주 5회 이상: 15점 (만점)",
+                "주 3~4회: 12점",
+                "주 1~2회: 8점",
+                "운동 안 함: 3점"
+              ]}
+            />
+
+            <ScoreItem
+              title="생활습관"
+              points={10}
+              color="#F97316"
+              description="음주, 흡연 등 생활습관 평가"
+              details={[
+                "비흡연, 주 1회 이하 음주: 10점 (만점)",
+                "비흡연, 주 2~3회 음주: 7점",
+                "흡연 또는 주 4회 이상 음주: 4점",
+                "흡연 + 과음: 2점"
+              ]}
+            />
+          </div>
+
+          {/* 등급 기준 */}
+          <div className="bg-gray-50 p-5 rounded-xl">
+            <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <Award className="w-5 h-5 text-purple-500" />
+              등급 기준
+            </h3>
+            <div className="space-y-2">
+              <GradeItem grade="A+" range="95~100점" color="#10B981" label="매우 우수" />
+              <GradeItem grade="A" range="90~94점" color="#34D399" label="우수" />
+              <GradeItem grade="B+" range="85~89점" color="#60A5FA" label="양호" />
+              <GradeItem grade="B" range="80~84점" color="#93C5FD" label="보통" />
+              <GradeItem grade="C" range="70~79점" color="#FBBF24" label="주의" />
+              <GradeItem grade="D" range="70점 미만" color="#F87171" label="관리 필요" />
+            </div>
+          </div>
+
+          {/* 안내 문구 */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-gray-700">
+              💡 <span className="font-semibold">건강점수는 참고용입니다.</span> 정확한 건강 상태는 의료 전문가와 상담하세요.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 점수 항목 컴포넌트
+const ScoreItem = ({ title, points, color, description, details }) => {
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-bold text-gray-800 flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></span>
+          {title}
+        </h4>
+        <span className="text-lg font-bold" style={{ color }}>{points}점</span>
+      </div>
+      <p className="text-sm text-gray-600 mb-3">{description}</p>
+      <div className="space-y-1">
+        {details.map((detail, idx) => (
+          <div key={idx} className="flex items-start gap-2 text-xs text-gray-600">
+            <span className="text-purple-500 mt-0.5">•</span>
+            <span>{detail}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// 등급 항목 컴포넌트
+const GradeItem = ({ grade, range, color, label }) => {
+  return (
+    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 transition">
+      <div className="flex items-center gap-3">
+        <div
+          className="px-3 py-1 rounded-full text-white font-bold text-sm"
+          style={{ backgroundColor: color }}
+        >
+          {grade}
+        </div>
+        <span className="text-sm font-semibold text-gray-700">{label}</span>
+      </div>
+      <span className="text-sm text-gray-600">{range}</span>
+    </div>
+  );
+};
+
 // 커스텀 툴팁
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -75,7 +262,9 @@ function MeasurementChart() {
   const { member } = useAuthStore();
   const [period, setPeriod] = useState("week");
   const [chartData, setChartData] = useState([]);
+  const [healthScore, setHealthScore] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [visibleLines, setVisibleLines] = useState({
     weight: true,
     bloodSugar: true,
@@ -86,16 +275,15 @@ function MeasurementChart() {
 
   useEffect(() => {
     fetchChartData();
+    fetchHealthScore();
   }, [period]);
 
   const fetchChartData = async () => {
     try {
       setLoading(true);
 
-      // 🔥 실제 API 호출
       const res = await api.get("/health/measurement/chart", {
-        params: { period },
-        headers: { "X-Member-Id": member?.id }
+        params: { period }
       });
 
       console.log("📊 차트 데이터:", res.data);
@@ -107,6 +295,17 @@ function MeasurementChart() {
       setChartData([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHealthScore = async () => {
+    try {
+      const res = await api.get("/health/measurement/summary");
+      console.log("💯 건강점수:", res.data);
+      setHealthScore(res.data.healthScore || 0);
+    } catch (err) {
+      console.error("💯 건강점수 불러오기 실패:", err);
+      setHealthScore(0);
     }
   };
 
@@ -127,11 +326,80 @@ function MeasurementChart() {
     return <Minus className="w-4 h-4 text-gray-400" />;
   };
 
+  const scoreInfo = healthScore !== null ? getHealthScoreGrade(healthScore) : null;
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
       <h1 className="text-3xl font-extrabold text-center bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent mb-8">
         건강정보 차트
       </h1>
+
+      {/* 건강점수 카드 */}
+      {scoreInfo && (
+        <div className="mb-6 bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <Activity className="w-6 h-6 text-purple-500" />
+                <h2 className="text-xl font-bold text-gray-800">현재 건강점수</h2>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="ml-2 p-1.5 hover:bg-purple-100 rounded-full transition group"
+                  title="산정 기준 보기"
+                >
+                  <HelpCircle className="w-5 h-5 text-purple-500 group-hover:text-purple-600" />
+                </button>
+              </div>
+              <div className="flex items-end gap-3">
+                <span className="text-6xl font-extrabold" style={{ color: scoreInfo.color }}>
+                  {healthScore}
+                </span>
+                <div className="mb-2">
+                  <div
+                    className="px-4 py-1 rounded-full text-white font-bold text-lg"
+                    style={{ backgroundColor: scoreInfo.color }}
+                  >
+                    {scoreInfo.grade}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{scoreInfo.label}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 원형 게이지 */}
+            <div className="relative w-32 h-32">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="#E5E7EB"
+                  strokeWidth="10"
+                  fill="none"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke={scoreInfo.color}
+                  strokeWidth="10"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 56}`}
+                  strokeDashoffset={`${2 * Math.PI * 56 * (1 - healthScore / 100)}`}
+                  strokeLinecap="round"
+                  style={{ transition: 'stroke-dashoffset 1s ease' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs text-gray-500">100점 만점</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 산정 기준 모달 */}
+      <ScoreCriteriaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* 미니 통계 카드 */}
       <div className="grid grid-cols-3 gap-4 mb-6">
