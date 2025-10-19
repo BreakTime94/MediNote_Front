@@ -10,6 +10,8 @@ const initialHealthForm = {
   drinking: false,
   drinkingPerWeek: "",
   drinkingPerOnce: "",
+  drinkingType: "", //소주, 맥주 등
+  drinkingUnit: "",
   chronicDiseaseYn: false,
   chronicDiseaseIds: [],
   allergyYn: false,
@@ -40,6 +42,38 @@ function Measurement() {
   //키워드 검색 훅
   const chronicSearchHook = useconditionSearch(chronicOptions);
   const allergySearchHook = useconditionSearch(allergyOptions);
+
+  //음주여부 Y -> 주종 변경 핸들러
+  useEffect(() => {
+    if(!form.drinking) {
+      setForm((prev) => ({
+        ...prev,
+        drinkingType: "",
+        drinkingUnit: "",
+        drinkingPerWeek: "",
+        drinkingPerOnce: "",
+      }));
+    }
+  }, [form.drinking]);
+
+  useEffect(() => {
+    switch (form.drinking) {
+      case "SOJU" :
+      case "WINE" :
+      case "WHISKY":
+      case "COCKTAIL":
+        setForm((p) => ({ ...p, drinkingUnit: "잔" }));
+        break;
+      case "BEER":
+        setForm((p) => ({ ...p, drinkingUnit: "캔" }));
+        break;
+      case "MAKGEOLLI":
+        setForm((p) => ({ ...p, drinkingUnit: "컵" }));
+        break;
+      default:
+        setForm((p) => ({ ...p, drinkingUnit: "" }));
+    }
+  }, [form.drinkingType]);
 
   //  질환/알러지 전체 불러오기
   useEffect(() => {
@@ -156,6 +190,8 @@ function Measurement() {
         drinking: form.drinking,
         drinkingPerWeek: form.drinkingPerWeek,
         drinkingPerOnce: form.drinkingPerOnce,
+        drinkingType: form.drinkingType,
+        drinkingUnit: form.drinkingUnit,
         chronicDiseaseYn: form.chronicDiseaseYn,
         chronicDiseaseIds: form.chronicDiseaseIds,
         allergyYn: form.allergyYn,
@@ -245,30 +281,63 @@ function Measurement() {
 
               {/* 음주 상세 */}
               {form.drinking && (
+                <div className="space-y-4 mt-3">
+                  <div>
+                    <label className="font-semibold">주종 선택 : </label>
+                    <select
+                      name="drinkingType"
+                      value={form.drinkingType}
+                      onChange={(e) => setForm({...form, drinkingType: e.target.value})}
+                      className="mt-2 w-fall border rounded-lg px-3 py-2">
+                      <option value="">선택</option>
+                      <option value="SOJU">소주</option>
+                      <option value="BEER">맥주</option>
+                      <option value="WINE">와인</option>
+                      <option value="WHISKY">위스키</option>
+                      <option value="MAKGEOLLI">막걸리</option>
+                      <option value="COCKTAIL">칵테일</option>
+                      <option value="ETC">기타</option>
+                    </select>
+                  </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-gray-700 font-semibold mb-2">주당 음주 횟수(소주 기준)</label>
+                      <label className="block text-gray-700 font-semibold mb-2">주당 음주 횟수</label>
                       <input
                           type="number"
                           name="drinkingPerWeek"
                           value={form.drinkingPerWeek || ""}
                           onChange={handleChange}
-                          placeholder="횟수"
+                          placeholder="회"
                           className="border rounded-lg px-3 py-2 w-full"
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-700 font-semibold mb-2">1회당 음주량(잔)</label>
+                      <label className="block text-gray-700 font-semibold mb-2">1회당 음주량({form.drinkingUnit || "잔"})</label>
                       <input
                           type="number"
                           name="drinkingPerOnce"
                           value={form.drinkingPerOnce || ""}
                           onChange={handleChange}
-                          placeholder="잔"
+                          placeholder={
+                            form.drinkingType === "BEER"
+                              ? "예: 3캔 (500ml 기준)"
+                              : form.drinkingType === "SOJU"
+                                ? "예: 반병~1병 (잔 수 약 5~7잔)"
+                                : form.drinkingType === "WINE"
+                                  ? "예: 2잔 (125ml 잔 기준)"
+                                  : form.drinkingType === "WHISKY"
+                                    ? "예: 1잔 (40ml 기준)"
+                                    : form.drinkingType === "MAKGEOLLI"
+                                      ? "예: 2컵 (200ml 기준)"
+                                      : form.drinkingType === "COCKTAIL"
+                                        ? "예: 2잔 (보통잔 기준)"
+                                        : "예: 1회당 음주량을 입력해주세요"
+                          }
                           className="border rounded-lg px-3 py-2 w-full"
                       />
                     </div>
                   </div>
+                </div>
               )}
 
               {/*  기저질환 */}
@@ -505,7 +574,7 @@ function Measurement() {
               {/* 혈압/혈당 */}
               <div className="grid grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">수축기 혈압</label>
+                  <label className="block text-gray-700 font-semibold mb-2">수축기 혈압(mmHg)</label>
                   <input
                       type="number"
                       name="bloodPressureSystolic"
@@ -521,7 +590,7 @@ function Measurement() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">이완기 혈압</label>
+                  <label className="block text-gray-700 font-semibold mb-2">이완기 혈압(mmHg)</label>
                   <input
                       type="number"
                       name="bloodPressureDiastolic"
@@ -580,7 +649,6 @@ function Measurement() {
           </form>
         </div>
     );
-
 }
 
 export default Measurement;
