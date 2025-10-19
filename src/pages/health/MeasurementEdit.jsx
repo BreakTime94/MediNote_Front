@@ -4,12 +4,17 @@ import api from "@/components/common/api/axiosInterceptor.js";
 import dayjs from "dayjs";
 import {MeasurementValidation} from "./MeasurementValidation.jsx";
 import {useconditionSearch} from "@/pages/health/useconditionSearch.jsx";
+import {calculatePreviewScore, getScoreGrade} from "./healthScoreCalculator.js";  // 🔥 추가
 
 function MeasurementEdit({ id, onMypage }) {
   const navigate = useNavigate();
   const params = useParams();
   const [memberId, setMemberId] = useState(id);
   const [errors, setErrors] = useState({});
+
+  // 🔥 실시간 점수 계산 추가
+  const [previewScore, setPreviewScore] = useState(0);
+  const [scoreGrade, setScoreGrade] = useState({ grade: '-', text: '-', color: '#gray' });
 
   useEffect(() => {
     if (memberId === null || memberId === undefined) {
@@ -30,6 +35,16 @@ function MeasurementEdit({ id, onMypage }) {
   //  키워드 검색 훅 적용
   const chronicSearchHook = useconditionSearch(chronicOptions);
   const allergySearchHook = useconditionSearch(allergyOptions);
+
+  // 🔥 form이 변경될 때마다 점수 재계산
+  useEffect(() => {
+    if (form) {
+      const score = calculatePreviewScore(form);
+      const grade = getScoreGrade(score);
+      setPreviewScore(score);
+      setScoreGrade(grade);
+    }
+  }, [form]);
 
   // 등록폼과 동일하게 전체 리스트 1회 로딩
   useEffect(() => {
@@ -167,7 +182,7 @@ function MeasurementEdit({ id, onMypage }) {
       gender: form.gender,
       smoking: form.smoking,
       drinking: form.drinking,
-      drinkingType: form.drinkingType, // 🔥 추가
+      drinkingType: form.drinkingType,
       drinkingPerWeek: form.drinkingPerWeek,
       drinkingPerOnce: form.drinkingPerOnce,
       chronicDiseaseYn:
@@ -185,6 +200,7 @@ function MeasurementEdit({ id, onMypage }) {
       bloodPressureDiastolic: form.bloodPressureDiastolic,
       bloodSugar: form.bloodSugar,
       sleepHours: form.sleepHours,
+      birthDate: form.birthDate,
     };
 
     try {
@@ -208,7 +224,55 @@ function MeasurementEdit({ id, onMypage }) {
         건강정보 수정
       </h1>
 
+      {/* 🔥 실시간 건강점수 프리뷰 */}
+      <div className="mb-6 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-600 mb-1 font-semibold">예상 건강점수</p>
+            <div className="flex items-end gap-2">
+              <span className="text-5xl font-bold" style={{ color: scoreGrade.color }}>
+                {previewScore}
+              </span>
+              <span className="text-xl text-gray-500 mb-2">점</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div
+              className="text-4xl font-bold mb-1"
+              style={{ color: scoreGrade.color }}
+            >
+              {scoreGrade.grade}
+            </div>
+            <div className="text-sm text-gray-600 font-semibold">{scoreGrade.text}</div>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-purple-200">
+          <p className="text-xs text-gray-500 flex items-center gap-1">
+            <span className="text-base">💡</span>
+            <span>수정 내용이 반영된 예상 점수입니다</span>
+          </p>
+        </div>
+      </div>
+
       <div className="space-y-6">
+        {/* 생년월일 */}
+        <div>
+          <label className="font-semibold">생년월일</label>
+          <input
+            type="date"
+            name="birthDate"
+            value={form.birthDate || ""}
+            onChange={handleChange}
+            className="mt-2 w-full border rounded-lg px-3 py-2"
+          />
+          {(form.age || form.ageGroup) && (
+            <p className="text-gray-600 text-sm mt-1">
+              나이: <span className="font-medium">{form.age || "-"}</span>세 / 연령대:{" "}
+              <span className="font-medium">{form.ageGroup || "-"}</span>
+            </p>
+          )}
+        </div>
+
         {/* 성별 */}
         <div>
           <label className="font-semibold">성별</label>
@@ -236,8 +300,8 @@ function MeasurementEdit({ id, onMypage }) {
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
-            <option value="true">예</option>
             <option value="false">아니오</option>
+            <option value="true">예</option>
           </select>
         </div>
 
@@ -252,8 +316,8 @@ function MeasurementEdit({ id, onMypage }) {
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
-            <option value="true">예</option>
             <option value="false">아니오</option>
+            <option value="true">예</option>
           </select>
         </div>
 
@@ -261,16 +325,17 @@ function MeasurementEdit({ id, onMypage }) {
         {form.drinking && (
           <div className="space-y-4 mt-2">
             {/* 주종 선택 */}
-            <div className="flex items-center gap-3">
-              <label className="font-medium text-gray-700 whitespace-nowrap">주종 선택 : </label>
+            <div>
+              <label className="font-semibold">주종 선택</label>
               <select
                 name="drinkingType"
                 value={form.drinkingType || ""}
                 onChange={handleChange}
-                className="border rounded-lg px-3 py-2">
+                className="mt-2 w-full border rounded-lg px-3 py-2"
+              >
                 <option value="">선택</option>
-                <option value="BEER">맥주</option>
                 <option value="SOJU">소주</option>
+                <option value="BEER">맥주</option>
                 <option value="WINE">와인</option>
                 <option value="WHISKY">위스키</option>
                 <option value="MAKGEOLLI">막걸리</option>
@@ -281,40 +346,49 @@ function MeasurementEdit({ id, onMypage }) {
 
             {/* 주당 음주 횟수 / 1회 음주량 */}
             <div className="grid grid-cols-2 gap-6">
-              <input
-                type="number"
-                name="drinkingPerWeek"
-                value={form.drinkingPerWeek || ""}
-                onChange={handleChange}
-                placeholder="주당 음주 횟수"
-                step="0.1"
-                min="0"
-                className="border rounded-lg px-3 py-2"
-              />
-              <input
-                type="number"
-                name="drinkingPerOnce"
-                value={form.drinkingPerOnce || ""}
-                onChange={handleChange}
-                placeholder={
-                  form.drinkingType === "BEER"
-                    ? "예: 3캔 (500ml 기준)"
-                    : form.drinkingType === "SOJU"
-                      ? "예: 반병~1병 (잔 수 약 5~7잔)"
-                      : form.drinkingType === "WINE"
-                        ? "예: 2잔 (125ml 잔 기준)"
-                        : form.drinkingType === "WHISKY"
-                          ? "예: 1잔 (40ml 기준)"
-                          : form.drinkingType === "MAKGEOLLI"
-                            ? "예: 2컵 (200ml 기준)"
-                            : form.drinkingType === "COCKTAIL"
-                              ? "예: 2잔 (보통잔 기준)"
-                              : "예: 1회당 음주량을 입력해주세요"
-                }
-                step="0.1"
-                min="0"
-                className="border rounded-lg px-3 py-2"
-              />
+              <div>
+                <label className="block font-semibold">주당 음주 횟수</label>
+                <input
+                  type="number"
+                  name="drinkingPerWeek"
+                  value={form.drinkingPerWeek || ""}
+                  onChange={handleChange}
+                  placeholder="회"
+                  step="0.1"
+                  min="0"
+                  className="border rounded-lg px-3 py-2 w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold">
+                  1회당 음주량 (단위 자동)
+                </label>
+                <input
+                  type="number"
+                  name="drinkingPerOnce"
+                  value={form.drinkingPerOnce || ""}
+                  onChange={handleChange}
+                  placeholder={
+                    form.drinkingType === "BEER"
+                      ? "예: 3캔 (500ml)"
+                      : form.drinkingType === "SOJU"
+                        ? "예: 반병~1병"
+                        : form.drinkingType === "WINE"
+                          ? "예: 2잔"
+                          : form.drinkingType === "WHISKY"
+                            ? "예: 1잔"
+                            : form.drinkingType === "MAKGEOLLI"
+                              ? "예: 2컵"
+                              : form.drinkingType === "COCKTAIL"
+                                ? "예: 2잔"
+                                : "예: 1회당 음주량 입력"
+                  }
+                  step="0.1"
+                  min="0"
+                  className="border rounded-lg px-3 py-2 w-full"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -333,8 +407,8 @@ function MeasurementEdit({ id, onMypage }) {
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
-            <option value="true">예</option>
             <option value="false">아니오</option>
+            <option value="true">예</option>
           </select>
 
           {form.chronicDiseaseYn === true && (
@@ -399,8 +473,8 @@ function MeasurementEdit({ id, onMypage }) {
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
-            <option value="true">예</option>
             <option value="false">아니오</option>
+            <option value="true">예</option>
           </select>
 
           {form.allergyYn === true && (
@@ -469,8 +543,8 @@ function MeasurementEdit({ id, onMypage }) {
             }
             className="mt-2 w-full border rounded-lg px-3 py-2"
           >
-            <option value="true">예</option>
             <option value="false">아니오</option>
+            <option value="true">예</option>
           </select>
 
           {form.medicationYn === true && (
