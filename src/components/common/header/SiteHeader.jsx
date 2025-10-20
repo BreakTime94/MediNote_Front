@@ -36,12 +36,7 @@ function SiteHeader() {
 
           {/* 우측 버튼들 */}
           <div className="flex items-center space-x-4">
-            <IconButton
-                onClick={() => alert("검색 버튼 클릭!")}
-                ariaLabel="검색"
-            >
-              <IoIosSearch size={20} />
-            </IconButton>
+
 
             {/* 비로그인 일 때 */}
             {!member && (
