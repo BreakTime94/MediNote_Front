@@ -17,12 +17,12 @@ export default function FaqListPanel({
     const navigate = useNavigate();
     const { member, loading: authLoading, fetchMember } = useAuthStore(); // ✅ 관리자 여부 확인용
 
-    // 멤버 정보 없을 시 1회 로드
-    useEffect(() => {
-        if (!member && !authLoading && fetchMember) {
-            fetchMember();
-        }
-    }, [member, authLoading, fetchMember]);
+    // // 멤버 정보 없을 시 1회 로드
+    // useEffect(() => {
+    //     if (!member && !authLoading && fetchMember) {
+    //         fetchMember();
+    //     }
+    // }, [member, authLoading, fetchMember]);
 
     const isAdmin = member?.role === "ADMIN"; // ✅ 관리자 판별
 

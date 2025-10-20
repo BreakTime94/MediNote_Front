@@ -28,12 +28,12 @@ export default function NotifyListPanel({
 
     const { member, loading: authLoading, fetchMember } = useAuthStore();
 
-    // 멤버 정보 없으면 한번 가져오기(선택)
-    useEffect(() => {
-        if (!member && !authLoading && fetchMember) {
-                fetchMember();
-                }
-            }, [member, authLoading, fetchMember]);
+    // // 멤버 정보 없으면 한번 가져오기(선택)
+    // useEffect(() => {
+    //     if (!member && !authLoading && fetchMember) {
+    //             fetchMember();
+    //             }
+    //         }, [member, authLoading, fetchMember]);
 
     const isAdmin = member?.role === "ADMIN";
 
