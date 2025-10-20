@@ -1,5 +1,6 @@
+// src/components/faq/FaqListPanel.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";          // ✅ Link 제거
 import api from "../common/api/axiosInterceptor.js";
 import { getCategoryName } from "../common/constants/boardCategory.js";
 import { useAuthStore } from "@/components/common/hooks/useAuthStore.jsx"; // ✅ 추가
@@ -203,9 +204,7 @@ export default function FaqListPanel({
                             onClick={() => fetchData(p)}
                             className={
                                 "px-3 py-1.5 text-sm rounded-lg ring-1 " +
-                                (p === page
-                                    ? "bg-gray-900 text-white ring-gray-900"
-                                    : "ring-gray-200 hover:bg-gray-50")
+                                (p === page ? "bg-gray-900 text-white ring-gray-900" : "ring-gray-200 hover:bg-gray-50")
                             }
                         >
                             {p}
