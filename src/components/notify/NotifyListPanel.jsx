@@ -160,9 +160,8 @@ export default function NotifyListPanel({
             {/* 리스트 */}
             <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <div className="grid grid-cols-12 gap-2 px-4 md:px-6 py-3 text-xs md:text-sm text-gray-500 bg-gray-50">
-                    <div className="col-span-7 md:col-span-7">제목</div>
+                    <div className="col-span-9 md:col-span-9">제목</div>
                     <div className="hidden md:block md:col-span-3 text-center">작성일</div>
-                    <div className="hidden md:block md:col-span-2 text-center">게시상태</div>
                 </div>
 
                 {loading ? (
@@ -175,7 +174,7 @@ export default function NotifyListPanel({
                     <ul className="divide-y divide-gray-100">
                         {items.map((notice) => (
                             <li key={notice.id} className="grid grid-cols-12 gap-2 px-4 md:px-6 py-4">
-                                <div className="col-span-12 md:col-span-7">
+                                <div className="col-span-12 md:col-span-9">
                                     <button
                                         onClick={() => goRead(notice.id)}
                                         className="text-left text-gray-900 hover:underline"
@@ -183,26 +182,14 @@ export default function NotifyListPanel({
                                     >
                                         <span className="font-medium">{notice.title}</span>
                                     </button>
+                                    {/* 모바일 전용 작성일 표시 */}
                                     <div className="mt-1 md:hidden text-xs text-gray-500">
-                                        {fmtDate(notice.regDate)} ·{" "}
-                                        {notice.postStatus === "ACTIVE"
-                                            ? "게시중"
-                                            : notice.postStatus === "DELETED"
-                                                ? "삭제됨"
-                                                : notice.postStatus}
+                                        {fmtDate(notice.regDate)}
                                     </div>
                                 </div>
 
                                 <div className="hidden md:flex md:col-span-3 items-center justify-center text-sm text-gray-600">
                                     {fmtDate(notice.regDate)}
-                                </div>
-
-                                <div className="hidden md:flex md:col-span-2 items-center justify-center text-sm text-gray-600">
-                                    {notice.postStatus === "ACTIVE"
-                                        ? "게시중"
-                                        : notice.postStatus === "DELETED"
-                                            ? "삭제됨"
-                                            : notice.postStatus}
                                 </div>
                             </li>
                         ))}

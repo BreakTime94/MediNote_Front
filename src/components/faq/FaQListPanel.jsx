@@ -2,12 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";          // ✅ Link 제거
 import api from "../common/api/axiosInterceptor.js";
-import { getCategoryName } from "../common/constants/boardCategory.js"; // ✅ 추가
+import { getCategoryName } from "../common/constants/boardCategory.js";
+import { useAuthStore } from "@/components/common/hooks/useAuthStore.jsx"; // ✅ 추가
 
-/**
- * FaqListPanel - FAQ 게시판 목록 컴포넌트
- */
-export default function FaQListPanel({
+export default function FaqListPanel({
                                          initialKeyword = "",
                                          pageSizeOptions = [5, 10, 20],
                                          defaultSize = 10,
@@ -17,12 +15,21 @@ export default function FaQListPanel({
                                          adminMode = false,
                                      }) {
     const navigate = useNavigate();
+    const { member, loading: authLoading, fetchMember } = useAuthStore(); // ✅ 관리자 여부 확인용
+
+    // 멤버 정보 없을 시 1회 로드
+    useEffect(() => {
+        if (!member && !authLoading && fetchMember) {
+            fetchMember();
+        }
+    }, [member, authLoading, fetchMember]);
+
+    const isAdmin = member?.role === "ADMIN"; // ✅ 관리자 판별
 
     // 상태 관리
     const [keyword, setKeyword] = useState(initialKeyword);
     const [size, setSize] = useState(defaultSize);
     const [page, setPage] = useState(1);
-
     const [items, setItems] = useState([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -30,11 +37,16 @@ export default function FaQListPanel({
 
     const totalPages = useMemo(() => Math.max(1, Math.ceil(total / size)), [total, size]);
 
-    // ✅ 라우터에 맞춘 네비게이션 콜백
-    const goWrite = () => (onWrite ? onWrite() : navigate("/boards/faq/write"));
-    const goRead  = (id) => (onRead ? onRead(id) : navigate(`/boards/faq/read/${id}`));
+    const goWrite = () => {
+        if (!isAdmin) {
+            alert("관리자만 FAQ를 등록할 수 있습니다.");
+            return;
+        }
+        return onWrite ? onWrite() : navigate("/boards/faq/write");
+    };
 
-    // 날짜 포맷
+    const goRead = (id) => (onRead ? onRead(id) : navigate(`/boards/faq/read/${id}`));
+
     const fmtDate = (iso) => {
         if (!iso) return "-";
         const d = new Date(iso);
@@ -44,7 +56,6 @@ export default function FaQListPanel({
         ).padStart(2, "0")}`;
     };
 
-    // ✅ 데이터 조회 + 카테고리명 변환
     const fetchData = async (nextPage = 1) => {
         setLoading(true);
         setError("");
@@ -57,7 +68,6 @@ export default function FaQListPanel({
             };
             const res = await api.post("/boards/faq/list", body);
 
-            // ✅ boardCategoryId → boardCategoryName 변환 추가
             const mapped = (res.data?.items || []).map((item) => ({
                 ...item,
                 boardCategoryName: getCategoryName(item.boardCategoryId, true),
@@ -89,12 +99,13 @@ export default function FaQListPanel({
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-2xl font-semibold text-gray-900">FAQ</h2>
+                    <h2 className="text-2xl font-semibold text-gray-900">자주 묻는 질문</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        자주 묻는 질문을 검색하거나 새로운 항목을 등록해보세요.
+                        메디노트 이용 중 자주 묻는 질문을 확인하세요.
                     </p>
                 </div>
-                {showWriteButton && (
+                {/* ✅ 관리자만 노출 */}
+                {showWriteButton && isAdmin && (
                     <button
                         onClick={goWrite}
                         className="rounded-2xl px-4 py-2 shadow-sm text-white bg-gradient-to-r from-pink-300 to-purple-300 hover:opacity-90 transition"
@@ -142,9 +153,8 @@ export default function FaQListPanel({
             {/* 리스트 */}
             <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <div className="grid grid-cols-12 gap-2 px-4 md:px-6 py-3 text-xs md:text-sm text-gray-500 bg-gray-50">
-                    <div className="col-span-8 md:col-span-8">제목</div>
+                    <div className="col-span-10 md:col-span-10">제목</div>
                     <div className="hidden md:block md:col-span-2 text-center">작성일</div>
-                    <div className="hidden md:block md:col-span-2 text-center">공개여부</div>
                 </div>
 
                 {loading ? (
@@ -157,7 +167,7 @@ export default function FaQListPanel({
                     <ul className="divide-y divide-gray-100">
                         {items.map((faq) => (
                             <li key={faq.id} className="grid grid-cols-12 gap-2 px-4 md:px-6 py-4">
-                                <div className="col-span-12 md:col-span-8">
+                                <div className="col-span-12 md:col-span-10">
                                     <button
                                         onClick={() => goRead(faq.id)}
                                         className="text-left text-gray-900 hover:underline"
@@ -166,26 +176,13 @@ export default function FaQListPanel({
                                         <span className="font-medium">{faq.title}</span>
                                     </button>
 
-                                    {/* ✅ 카테고리 이름 표시 */}
-                                    {faq.boardCategoryName && (
-                                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                      <span className="text-[11px] md:text-xs px-2 py-0.5 rounded-full bg-gray-50 ring-1 ring-gray-200 text-gray-600">
-                        {faq.boardCategoryName}
-                      </span>
-                                        </div>
-                                    )}
-
                                     <div className="mt-1 md:hidden text-xs text-gray-500">
-                                        {fmtDate(faq.regDate)} · {faq.isPublic === false ? "비공개" : "공개"}
+                                        {fmtDate(faq.regDate)}
                                     </div>
                                 </div>
 
                                 <div className="hidden md:flex md:col-span-2 items-center justify-center text-sm text-gray-600">
                                     {fmtDate(faq.regDate)}
-                                </div>
-
-                                <div className="hidden md:flex md:col-span-2 items-center justify-center text-sm text-gray-600">
-                                    {faq.isPublic === false ? "비공개" : "공개"}
                                 </div>
                             </li>
                         ))}
