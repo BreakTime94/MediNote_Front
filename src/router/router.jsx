@@ -43,17 +43,6 @@ const router = createBrowserRouter([
 
             // ✅ 루트 레벨의 coming-soon
             { path: "coming-soon", element: <ComingSoon /> },
-
-            // ✅ 루트 레벨의 404 대체
-            {
-                path: "*",
-                element: (
-                    <ComingSoon
-                        title="추후 개발 예정입니다"
-                        description="준비 중이거나 주소가 잘못되었습니다."
-                    />
-                ),
-            },
         ]
     },
   {
