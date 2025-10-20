@@ -1,11 +1,11 @@
 export const NavData = [
     {
         label: "소개",
-        path: "/about",
+        path: "/coming-soon",
         children: [
-            { label: "프로젝트 소개", path: "/about/project" },
-            { label: "철학 & 가치", path: "/about/philosophy" },
-            { label: "팀 소개", path: "/about/team" },
+            { label: "프로젝트 소개", path: "/coming-soon" },
+            { label: "철학 & 가치", path: "/coming-soon" },
+            { label: "팀 소개", path: "/coming-soon" },
         ],
     },
     {
@@ -28,21 +28,16 @@ export const NavData = [
     },
     {
         label: "헬스파인더",
-        path: "/finder",
+        path: "/coming-soon",
         children: [
-            { label: "건강검진", path: "/finder/checkup" },
-            { label: "예방접종", path: "/finder/vaccine" },
-            { label: "운동 프로그램", path: "/finder/programs" },
+            { label: "건강검진", path: "/coming-soon" },
+            { label: "예방접종", path: "/coming-soon" },
+            { label: "운동 프로그램", path: "/coming-soon" },
         ],
     },
     {
         label: "내주변 병원",
         path: "/map",
-        children: [
-            { label: "내과", path: "/nearby/internal" },
-            { label: "정형외과", path: "/nearby/ortho" },
-            { label: "치과", path: "/nearby/dental" },
-        ],
     },
     {
         label: "고객지원",
