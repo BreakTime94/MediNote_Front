@@ -15,6 +15,8 @@ import newsRouter from "@/router/news/newsRouter.jsx";
 
 //Lazy 로드
 const Index = lazy(() => import("../pages/home/Index.jsx"))
+const ComingSoon = lazy(() => import("../components/dummy/ComingSoon.jsx"));
+
 const router = createBrowserRouter([
     {
         path:"/",
@@ -37,7 +39,21 @@ const router = createBrowserRouter([
               children: [
                 ...measurementRouter
               ]
-            }
+            },
+
+            // ✅ 루트 레벨의 coming-soon
+            { path: "coming-soon", element: <ComingSoon /> },
+
+            // ✅ 루트 레벨의 404 대체
+            {
+                path: "*",
+                element: (
+                    <ComingSoon
+                        title="추후 개발 예정입니다"
+                        description="준비 중이거나 주소가 잘못되었습니다."
+                    />
+                ),
+            },
         ]
     },
   {
@@ -55,6 +71,7 @@ const router = createBrowserRouter([
           // 다른 관리자 페이지들
         ],
       },
+
     ],
   },
 ]);

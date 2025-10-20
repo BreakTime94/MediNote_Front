@@ -122,14 +122,14 @@ export default function QnAReplyPanel({ linkId, onAnswerComplete }) {
             </div>
 
             <div className="p-5 space-y-6">
-                {isAdmin ? (
+                {isAdmin && (
                     <form onSubmit={handleSubmit} className="space-y-3">
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder="답변 내용을 입력하세요."
-                            className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 min-h-[100px]"
-                        />
+    <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="답변 내용을 입력하세요."
+        className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 min-h-[100px]"
+    />
                         <div className="flex justify-end">
                             <button
                                 type="submit"
@@ -140,10 +140,6 @@ export default function QnAReplyPanel({ linkId, onAnswerComplete }) {
                             </button>
                         </div>
                     </form>
-                ) : (
-                    <p className="text-sm text-gray-500">
-                        관리자만 답변을 작성할 수 있습니다.
-                    </p>
                 )}
 
                 {loading ? (
