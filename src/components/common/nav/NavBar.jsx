@@ -11,15 +11,13 @@ function NavBar(props) {
     } = props;
 
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const closeTimeoutRef = useRef(null); // ✅ 딜레이 타이머용 ref
+    const closeTimeoutRef = useRef(null);
 
-    // 마우스 진입 시 즉시 오픈 + 닫기 타이머 취소
     const handleMouseEnter = (index) => {
         clearTimeout(closeTimeoutRef.current);
         setActiveDropdown(index);
     };
 
-    // 마우스가 나갔을 때 200ms 뒤 닫기
     const handleMouseLeave = () => {
         clearTimeout(closeTimeoutRef.current);
         closeTimeoutRef.current = setTimeout(() => {
@@ -42,7 +40,7 @@ function NavBar(props) {
         <nav className={navClass} role="navigation" aria-label="메인 네비게이션">
             {items.map((item, index) => (
                 <NavItem
-                    key={item.path ?? item.label}
+                    key={item.id ?? `nav-${index}`}            // ✅ 고유 id 사용
                     item={item}
                     index={index}
                     isActive={activeDropdown === index}
@@ -62,6 +60,7 @@ function NavItem({
                      onMouseLeave,
                  }) {
     const {
+        id,
         label,
         path = "#",
         children = [],
@@ -108,9 +107,9 @@ function NavItem({
                 >
                     <div className="py-3 px-2">
                         <div className="space-y-1">
-                            {children.map((child) => (
+                            {children.map((child, j) => (
                                 <NavLink
-                                    key={child.path}
+                                    key={child.id ?? `nav-${id ?? index}-${j}`}   // ✅ 자식도 고유 id 사용
                                     to={child.path}
                                     target={child.target}
                                     rel={child.rel}
