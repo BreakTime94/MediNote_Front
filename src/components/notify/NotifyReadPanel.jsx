@@ -6,32 +6,52 @@ import { useAuthStore } from "@/components/common/hooks/useAuthStore.jsx";
 
 export default function NotifyReadPanel({
                                             onBack,
-                                            showAdminActions = true,          // 권한 제어는 추후 적용
-                                            listPath = "/boards/notice",      // ✅ 라우터에 맞춰 기본 경로 고정
+                                            showAdminActions = true,              // 외부에서 끌 수도 있음
+                                            listPath = "/boards/notice",
                                         }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const { member } = useAuthStore();
 
-    const [data, setData] = useState(null);   // BoardDetailResponseDTO
+    const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
 
-    // 인라인 수정 상태
     const [editMode, setEditMode] = useState(false);
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [saving, setSaving] = useState(false);
     const [saveErr, setSaveErr] = useState("");
-
     const [deleting, setDeleting] = useState(false);
 
-    // 게시 상태 배지 스타일
+    // ✅ ADMIN 판별(여러 형태 대비)
+    const isAdmin = useMemo(() => {
+        const raw =
+            (member?.role ||
+                member?.memberRole ||
+                member?.roleName ||
+                "") + "";
+        const rolesArr = Array.isArray(member?.roles) ? member.roles : [];
+        const authArr = Array.isArray(member?.authorities) ? member.authorities : [];
+        if (raw.toUpperCase() === "ADMIN") return true;
+        if (rolesArr.map((r) => (r + "").toUpperCase()).includes("ADMIN")) return true;
+        if (
+            authArr.some((a) =>
+                typeof a === "string"
+                    ? a.toUpperCase().includes("ADMIN")
+                    : (a?.authority + "").toUpperCase().includes("ADMIN")
+            )
+        )
+            return true;
+        return false;
+    }, [member]);
+
+    // 게시 상태 배지
     const statusBadge = useMemo(() => {
         const ps = data?.postStatus;
         if (ps === "PUBLISHED") return "bg-green-50 text-green-700 ring-1 ring-green-200";
-        if (ps === "HIDDEN")    return "bg-gray-50 text-gray-700 ring-1 ring-gray-200";
-        if (ps === "DELETED")   return "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
+        if (ps === "HIDDEN") return "bg-gray-50 text-gray-700 ring-1 ring-gray-200";
+        if (ps === "DELETED") return "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
         return "bg-gray-50 text-gray-700 ring-1 ring-gray-200";
     }, [data]);
 
@@ -72,6 +92,7 @@ export default function NotifyReadPanel({
 
     // ===== 수정 =====
     const handleEditToggle = () => {
+        if (!isAdmin) return; // ✅ 비관리자 방어
         setSaveErr("");
         setEditMode((v) => !v);
         if (data) {
@@ -81,6 +102,7 @@ export default function NotifyReadPanel({
     };
 
     const handleSave = async () => {
+        if (!isAdmin) return; // ✅ 비관리자 방어
         setSaveErr("");
         if (!title?.trim() || title.trim().length < 2) {
             setSaveErr("제목은 2자 이상 입력하세요.");
@@ -93,18 +115,17 @@ export default function NotifyReadPanel({
 
         setSaving(true);
         try {
-            // BoardUpdateRequestDTO(id, boardCategoryId, title, content, isPublic, requireAdminPost, qnaStatus, postStatus)
             const dto = {
-                id: Number(id),                                   // ✅ path id와 동일하게 body에도 포함
-                boardCategoryId: data?.boardCategoryId ?? 1,      // 공지 카테고리(서버값 우선)
+                id: Number(id),
+                boardCategoryId: data?.boardCategoryId ?? 1,
                 title: title.trim(),
                 content: content.trim(),
-                isPublic: data?.isPublic ?? true,                 // null 패치 방지 위해 현값 전송
+                isPublic: data?.isPublic ?? true,
                 requireAdminPost: data?.requireAdminPost ?? false,
-                qnaStatus: data?.qnaStatus ?? "WAITING",          // DTO 필드 존재로 기본 유지
+                qnaStatus: data?.qnaStatus ?? "WAITING",
                 postStatus: data?.postStatus ?? "PUBLISHED",
             };
-            await api.put(`/boards/update/${id}`, dto);       // ✅ PATCH /boards/update/{id}
+            await api.put(`/boards/update/${id}`, dto);
             await fetchDetail();
             setEditMode(false);
         } catch (e) {
@@ -125,12 +146,13 @@ export default function NotifyReadPanel({
 
     // ===== 삭제 =====
     const handleDelete = async () => {
+        if (!isAdmin) return; // ✅ 비관리자 방어
         if (!confirm("정말 삭제하시겠습니까? (소프트 삭제)")) return;
         setDeleting(true);
         try {
             const requesterId = member?.id ?? member?.memberId ?? 0;
-            await api.delete(`/boards/delete/${id}`, {         // ✅ DELETE /boards/delete/{id}
-                data: { requesterId, reason: "공지 삭제" },      // ✅ 컨트롤러 스펙: body에 requesterId, reason
+            await api.delete(`/boards/delete/${id}`, {
+                data: { requesterId, reason: "공지 삭제" },
             });
             alert("삭제되었습니다.");
             goBack();
@@ -150,7 +172,9 @@ export default function NotifyReadPanel({
                     <h2 className="text-2xl font-semibold text-gray-900">공지사항</h2>
                     <p className="text-sm text-gray-500 mt-1">공지 상세</p>
                 </div>
+
                 <div className="flex items-center gap-2">
+                    {/* 목록 버튼은 항상 노출 */}
                     <button
                         onClick={goBack}
                         className="rounded-2xl px-4 py-2 shadow-sm ring-1 ring-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition"
@@ -158,34 +182,39 @@ export default function NotifyReadPanel({
                         목록
                     </button>
 
-                    {/* 수정/삭제: 우선 기능 노출 */}
-                    {!editMode ? (
-                        <button
-                            onClick={handleEditToggle}
-                            className="rounded-2xl px-4 py-2 shadow-sm text-white bg-gradient-to-r from-pink-300 to-purple-300 hover:opacity-90 transition"
-                        >
-                            수정
-                        </button>
-                    ) : (
+                    {/* ✅ 관리자에게만 수정/저장/취소 노출 */}
+                    {isAdmin && (
                         <>
-                            <button
-                                onClick={handleSave}
-                                disabled={saving}
-                                className="rounded-2xl px-4 py-2 shadow-sm text-white bg-gradient-to-r from-pink-300 to-purple-300 hover:opacity-90 transition disabled:opacity-60"
-                            >
-                                {saving ? "저장 중…" : "저장"}
-                            </button>
-                            <button
-                                onClick={handleEditToggle}
-                                disabled={saving}
-                                className="rounded-2xl px-4 py-2 shadow-sm ring-1 ring-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition disabled:opacity-60"
-                            >
-                                취소
-                            </button>
+                            {!editMode ? (
+                                <button
+                                    onClick={handleEditToggle}
+                                    className="rounded-2xl px-4 py-2 shadow-sm text-white bg-gradient-to-r from-pink-300 to-purple-300 hover:opacity-90 transition"
+                                >
+                                    수정
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                        className="rounded-2xl px-4 py-2 shadow-sm text-white bg-gradient-to-r from-pink-300 to-purple-300 hover:opacity-90 transition disabled:opacity-60"
+                                    >
+                                        {saving ? "저장 중…" : "저장"}
+                                    </button>
+                                    <button
+                                        onClick={handleEditToggle}
+                                        disabled={saving}
+                                        className="rounded-2xl px-4 py-2 shadow-sm ring-1 ring-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition disabled:opacity-60"
+                                    >
+                                        취소
+                                    </button>
+                                </>
+                            )}
                         </>
                     )}
 
-                    {showAdminActions && (
+                    {/* ✅ 관리자 + showAdminActions=true 일 때만 삭제 노출 */}
+                    {showAdminActions && isAdmin && (
                         <button
                             onClick={handleDelete}
                             disabled={deleting}
@@ -211,7 +240,7 @@ export default function NotifyReadPanel({
                                 <h1 className="text-xl md:text-2xl font-semibold text-gray-900 break-words">
                                     {data?.title}
                                 </h1>
-                            ) : (
+                            ) : isAdmin ? (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">제목</label>
                                     <input
@@ -222,11 +251,10 @@ export default function NotifyReadPanel({
                                         maxLength={160}
                                     />
                                 </div>
-                            )}
+                            ) : null}
 
                             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-                                {/* 게시 상태 */}
-                                <span className={`px-2.5 py-1 rounded-full text-xs ${statusBadge}`}>
+                <span className={`px-2.5 py-1 rounded-full text-xs ${statusBadge}`}>
                   {data?.postStatus === "PUBLISHED"
                       ? "게시중"
                       : data?.postStatus === "HIDDEN"
@@ -236,14 +264,12 @@ export default function NotifyReadPanel({
                               : data?.postStatus}
                 </span>
 
-                                {/* 중요 공지 배지 (옵션) */}
                                 {data?.requireAdminPost && (
                                     <span className="px-2 py-0.5 rounded-full text-xs bg-gray-50 ring-1 ring-gray-200 text-gray-700">
                     중요
                   </span>
                                 )}
 
-                                {/* 카테고리 라벨 */}
                                 <span className="px-2 py-0.5 rounded-full text-xs bg-gray-50 ring-1 ring-gray-200 text-gray-600">
                   공지
                 </span>
@@ -276,7 +302,7 @@ export default function NotifyReadPanel({
                         <article className="prose prose-sm md:prose-base max-w-none text-gray-900 whitespace-pre-wrap break-words">
                             {data?.content}
                         </article>
-                    ) : (
+                    ) : isAdmin ? (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">내용</label>
                             <textarea
@@ -287,7 +313,7 @@ export default function NotifyReadPanel({
                             />
                             {saveErr && <p className="mt-2 text-sm text-rose-600">{saveErr}</p>}
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </section>
