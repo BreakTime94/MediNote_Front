@@ -7,7 +7,8 @@ import {
 } from "recharts";
 import { Activity, Moon, Droplet, Heart, TrendingUp, TrendingDown, Lightbulb, Target, HelpCircle, X, Award } from "lucide-react";
 
-/* 산정 기준 모달 */
+/* 산정 기준 모달 - 운동 제외, 재배분된 배점 */
+/* 산정 기준 모달 - 최종 100점 배점 */
 const ScoreCriteriaModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
@@ -38,39 +39,40 @@ const ScoreCriteriaModal = ({ isOpen, onClose }) => {
           <div className="space-y-4 mb-6">
             <ScoreItem
               title="체중/BMI"
-              points={20}
+              points={18}
               color="#EC4899"
-              description="정상 BMI 범위(18.5~24.9) 유지 시 만점"
+              description="연령대별 적정 BMI 범위 유지 시 만점"
               details={[
-                "BMI 18.5~24.9: 20점 (만점)",
-                "BMI 25~29.9: 15점 (과체중)",
-                "BMI 30 이상: 10점 (비만)",
-                "BMI 18.5 미만: 12점 (저체중)"
+                "20~30대: BMI 18.5~24.9 (만점 18점)",
+                "40~50대: BMI 18.5~25.9 (만점 18점)",
+                "60대 이상: BMI 19~26.9 (만점 18점)",
+                "※ 범위 벗어날수록 감점"
               ]}
             />
 
             <ScoreItem
               title="혈압"
-              points={20}
+              points={15}
               color="#F59E0B"
               description="수축기/이완기 혈압이 정상 범위일 때 만점"
               details={[
-                "수축기 120 미만, 이완기 80 미만: 20점 (만점)",
-                "수축기 120~139, 이완기 80~89: 15점 (주의)",
-                "수축기 140 이상, 이완기 90 이상: 10점 (고혈압)"
+                "수축기 ≤120, 이완기 ≤80: 15점 (만점)",
+                "수축기 121~130, 이완기 81~85: 11점",
+                "수축기 131~140, 이완기 86~90: 7점",
+                "수축기 >140 또는 이완기 >90: 4점"
               ]}
             />
 
             <ScoreItem
               title="혈당"
-              points={20}
+              points={15}
               color="#6366F1"
               description="공복 혈당이 정상 범위일 때 만점"
               details={[
-                "70~99 mg/dL: 20점 (만점)",
-                "100~125 mg/dL: 15점 (공복혈당장애)",
-                "126 mg/dL 이상: 10점 (당뇨 의심)",
-                "70 mg/dL 미만: 12점 (저혈당)"
+                "70~100 mg/dL: 15점 (만점)",
+                "101~125 mg/dL: 10점 (공복혈당장애)",
+                "126~180 mg/dL: 5점 (당뇨 의심)",
+                "70 미만 또는 180 초과: 3~8점"
               ]}
             />
 
@@ -78,38 +80,73 @@ const ScoreCriteriaModal = ({ isOpen, onClose }) => {
               title="수면"
               points={15}
               color="#14B8A6"
-              description="하루 7~8시간 수면 시 만점"
+              description="연령대별 적정 수면 시간 유지 시 만점"
               details={[
-                "7~8시간: 15점 (만점)",
-                "6~7시간 또는 8~9시간: 12점",
-                "5~6시간 또는 9시간 이상: 8점",
+                "성인(20~50대): 7~9시간 (만점 15점)",
+                "노년층(60대 이상): 7~9시간 (만점 15점)",
+                "5~7시간 미만 또는 9시간 초과: 9~10점",
                 "5시간 미만: 5점"
               ]}
             />
 
             <ScoreItem
-              title="운동"
-              points={15}
-              color="#8B5CF6"
-              description="주 3회 이상 규칙적인 운동"
+              title="흡연"
+              points={12}
+              color="#EF4444"
+              description="비흡연자에게 만점 부여"
               details={[
-                "주 5회 이상: 15점 (만점)",
-                "주 3~4회: 12점",
-                "주 1~2회: 8점",
-                "운동 안 함: 3점"
+                "비흡연: 12점 (만점)",
+                "흡연: 0점"
               ]}
             />
 
             <ScoreItem
-              title="생활습관"
+              title="음주"
               points={10}
               color="#F97316"
-              description="음주, 흡연 등 생활습관 평가"
+              description="음주 빈도와 음주량 기준"
               details={[
-                "비흡연, 주 1회 이하 음주: 10점 (만점)",
-                "비흡연, 주 2~3회 음주: 7점",
-                "흡연 또는 주 4회 이상 음주: 4점",
-                "흡연 + 과음: 2점"
+                "비음주: 10점 (만점)",
+                "주당 총 음주량 ≤7잔: 10점",
+                "주당 총 음주량 8~14잔: 7점",
+                "주당 총 음주량 >14잔: 3점"
+              ]}
+            />
+
+            <ScoreItem
+              title="기저질환"
+              points={8}
+              color="#8B5CF6"
+              description="만성질환 보유 개수에 따라 차등"
+              details={[
+                "없음: 8점 (만점)",
+                "1개: 6점",
+                "2개: 4점",
+                "3개 이상: 2점"
+              ]}
+            />
+
+            <ScoreItem
+              title="알러지"
+              points={4}
+              color="#06B6D4"
+              description="알러지 보유 개수에 따라 차등"
+              details={[
+                "없음: 4점 (만점)",
+                "1개: 2점",
+                "2개 이상: 1점"
+              ]}
+            />
+
+            <ScoreItem
+              title="복용약"
+              points={3}
+              color="#10B981"
+              description="정기 복용약 개수에 따라 차등"
+              details={[
+                "없음: 3점 (만점)",
+                "1~2개: 2점",
+                "3개 이상: 1점"
               ]}
             />
           </div>
@@ -121,12 +158,13 @@ const ScoreCriteriaModal = ({ isOpen, onClose }) => {
               등급 기준
             </h3>
             <div className="space-y-2">
-              <GradeItem grade="A+" range="95~100점" color="#10B981" label="매우 우수" />
-              <GradeItem grade="A" range="90~94점" color="#34D399" label="우수" />
-              <GradeItem grade="B+" range="85~89점" color="#60A5FA" label="양호" />
-              <GradeItem grade="B" range="80~84점" color="#93C5FD" label="보통" />
-              <GradeItem grade="C" range="70~79점" color="#FBBF24" label="주의" />
-              <GradeItem grade="D" range="70점 미만" color="#F87171" label="관리 필요" />
+              <GradeItem grade="A+" range="90~100점" color="#10B981" label="매우 건강" />
+              <GradeItem grade="A" range="80~89점" color="#22C55E" label="건강" />
+              <GradeItem grade="B+" range="70~79점" color="#84CC16" label="양호" />
+              <GradeItem grade="B" range="60~69점" color="#EAB308" label="보통" />
+              <GradeItem grade="C+" range="50~59점" color="#F59E0B" label="주의" />
+              <GradeItem grade="C" range="40~49점" color="#F97316" label="관리필요" />
+              <GradeItem grade="D" range="40점 미만" color="#EF4444" label="위험" />
             </div>
           </div>
 

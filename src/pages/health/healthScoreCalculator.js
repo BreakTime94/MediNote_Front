@@ -1,6 +1,7 @@
 /**
  * 프론트엔드용 건강점수 간단 계산 (실시간 프리뷰)
  * 백엔드와 유사한 로직
+ * 총 100점 만점
  */
 
 // 연령대 판단
@@ -52,7 +53,7 @@ export const calculatePreviewScore = (form) => {
   const age = form.birthDate ? calculateAge(form.birthDate) : null;
   const ageGroup = age ? getAgeGroup(age) : null;
 
-  // 1. BMI (15점)
+  // 1. BMI (18점)
   if (form.height && form.weight) {
     const bmi = form.weight / ((form.height / 100) ** 2);
     const isYoung = isYoungAge(ageGroup);
@@ -60,44 +61,44 @@ export const calculatePreviewScore = (form) => {
     const isSenior = isSeniorAge(ageGroup);
 
     if (isYoung) {
-      if (bmi < 16) score += 5;
-      else if (bmi < 18.5) score += 10;
-      else if (bmi < 25) score += 15;
-      else if (bmi < 30) score += 10;
-      else score += 5;
-    } else if (isMiddle) {
-      if (bmi < 18.5) score += 8;
-      else if (bmi < 26) score += 15;
-      else if (bmi < 30) score += 10;
-      else score += 5;
-    } else if (isSenior) {
-      if (bmi < 19) score += 8;
-      else if (bmi < 27) score += 15;
+      if (bmi < 16) score += 6;
+      else if (bmi < 18.5) score += 12;
+      else if (bmi < 25) score += 18;
       else if (bmi < 30) score += 12;
-      else score += 8;
+      else score += 6;
+    } else if (isMiddle) {
+      if (bmi < 18.5) score += 9;
+      else if (bmi < 26) score += 18;
+      else if (bmi < 30) score += 12;
+      else score += 6;
+    } else if (isSenior) {
+      if (bmi < 19) score += 9;
+      else if (bmi < 27) score += 18;
+      else if (bmi < 30) score += 14;
+      else score += 9;
     } else {
       // 기본
-      if (bmi >= 18.5 && bmi < 23) score += 15;
-      else if (bmi >= 16 && bmi < 30) score += 10;
-      else score += 5;
+      if (bmi >= 18.5 && bmi < 23) score += 18;
+      else if (bmi >= 16 && bmi < 30) score += 12;
+      else score += 6;
     }
   }
 
-  // 2. 혈압 (20점)
+  // 2. 혈압 (15점)
   if (form.bloodPressureSystolic && form.bloodPressureDiastolic) {
     const sys = Number(form.bloodPressureSystolic);
     const dia = Number(form.bloodPressureDiastolic);
 
     if (sys < 90 || dia < 60) {
-      score += 10;
+      score += 8;
     } else if (sys <= 120 && dia <= 80) {
-      score += 20;
-    } else if (sys <= 130 && dia <= 85) {
       score += 15;
+    } else if (sys <= 130 && dia <= 85) {
+      score += 11;
     } else if (sys <= 140 && dia <= 90) {
-      score += 10;
+      score += 7;
     } else {
-      score += 5;
+      score += 4;
     }
   }
 
@@ -111,55 +112,56 @@ export const calculatePreviewScore = (form) => {
     else score += 3;
   }
 
-  // 4. 수면 (10점)
+  // 4. 수면 (15점)
   if (form.sleepHours) {
     const hours = Number(form.sleepHours);
     const isAdult = isYoungAge(ageGroup) || isMiddleAge(ageGroup);
 
     if (isAdult) {
-      if (hours < 5) score += 3;
-      else if (hours < 7) score += 6;
-      else if (hours <= 9) score += 10;
-      else score += 7;
+      if (hours < 5) score += 5;
+      else if (hours < 7) score += 9;
+      else if (hours <= 9) score += 15;
+      else score += 10;
     } else {
-      if (hours >= 7 && hours <= 9) score += 10;
-      else if (hours >= 5) score += 6;
-      else score += 3;
+      if (hours >= 7 && hours <= 9) score += 15;
+      else if (hours >= 5) score += 9;
+      else score += 5;
     }
   }
 
-  // 5. 흡연 (15점)
-  if (!form.smoking) score += 15;
+  // 5. 흡연 (12점)
+  if (!form.smoking) score += 12;
 
-  // 6. 음주 (15점)
+  // 6. 음주 (10점)
   if (!form.drinking) {
-    score += 15;
+    score += 10;
   } else if (form.drinkingPerWeek && form.drinkingPerOnce) {
     const weekly = Number(form.drinkingPerWeek) * Number(form.drinkingPerOnce);
-    if (weekly <= 7) score += 15;
-    else if (weekly <= 14) score += 10;
-    else score += 5;
+    if (weekly <= 7) score += 10;
+    else if (weekly <= 14) score += 7;
+    else score += 3;
   } else {
-    score += 10;
+    score += 7;
   }
 
-  // 7. 기저질환 (5점)
+  // 7. 기저질환 (8점)
   if (!form.chronicDiseaseYn) {
-    score += 5;
+    score += 8;
   } else {
     const count = form.chronicDiseaseIds?.length || 0;
-    if (count === 0) score += 5;
-    else if (count === 1) score += 4;
-    else if (count === 2) score += 3;
+    if (count === 0) score += 8;
+    else if (count === 1) score += 6;
+    else if (count === 2) score += 4;
     else score += 2;
   }
 
-  // 8. 알러지 (2점)
+  // 8. 알러지 (4점)
   if (!form.allergyYn) {
-    score += 2;
+    score += 4;
   } else {
     const count = form.allergyIds?.length || 0;
-    if (count === 0) score += 2;
+    if (count === 0) score += 4;
+    else if (count === 1) score += 2;
     else score += 1;
   }
 
